@@ -17,6 +17,7 @@ vector<Vector3f> vecn;
 // This is the list of faces (indices into vecv and vecn)
 vector<vector<unsigned> > vecf;
 
+constexpr int MAX_BUFFER_SIZE = 255;
 constexpr int color_count = 4;
 int color_idx = 0;
 
@@ -167,6 +168,31 @@ void reshapeFunc(int w, int h)
 void loadInput()
 {
 	// load the OBJ file here
+    char buffer[MAX_BUFFER_SIZE];
+    while (cin.getline(buffer, MAX_BUFFER_SIZE)) {
+        stringstream ss(buffer);
+        string token = "";
+        ss >> token;
+
+        if (token == "v") {
+            float v0, v1, v2;
+            ss >> v0 >> v1 >> v2;
+            vecv.emplace_back(v0, v1, v2);
+        } else if (token == "vn") {
+            float v0, v1, v2;
+            ss >> v0 >> v1 >> v2;
+            vecn.emplace_back(v0, v1, v2);
+        } else if (token == "f") {
+            string line = "";
+            std::getline(ss, line);
+            unsigned int a, b, c, d, e, f, g, h, i;
+            sscanf(line.c_str(),
+                    " %u/%u/%u %u/%u/%u %u/%u/%u",
+                    &a, &b, &c, &d, &e, &f, &g, &h, &i);
+            cout << line << " " << a << " " << i << endl;
+            vecf.push_back({a, b, c, d, e, f, g, h, i});
+        }
+    }
 }
 
 // Main routine.
