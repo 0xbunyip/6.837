@@ -24,15 +24,30 @@ public:
 };
 
 vector<DrawableObject> draw_objects;
-
-constexpr int MAX_BUFFER_SIZE = 255;
-constexpr int color_count = 4;
-int color_idx = 0;
 int drawing_obj_idx = 0;
+
+// Here are some colors you might use - feel free to add more
+GLfloat diffColors[][4] = { 
+	{1.0, 0.0, 0.0, 1.0},
+	{1.0, 0.0, 1.0, 1.0},
+	{0.7, 0.0, 1.0, 1.0},
+	{0.2, 0.0, 1.0, 1.0},
+	{0.0, 1.0, 1.0, 1.0},
+	{0.0, 1.0, 0.0, 1.0},
+	{1.0, 1.0, 0.0, 1.0},
+};
+GLfloat* current_color = diffColors[0];
+
+constexpr int color_count = sizeof(diffColors) / sizeof(*diffColors);
+bool change_color = false;
+int color_idx = 0;
+int color_transition_step = 0;
+constexpr int kMaxColorTransitionStep = 20;
 
 GLfloat Lt0pos[] = {1.0f, 1.0f, 5.0f, 1.0f};
 
 // You will need more global variables to implement color and position changes
+constexpr int MAX_BUFFER_SIZE = 255;
 
 
 // These are convenience functions which allow us to call OpenGL
@@ -44,6 +59,36 @@ inline void glNormal(const Vector3f &a)
 { glNormal3fv(a); }
 
 
+void updateColor(int);
+void drawScene(void);
+
+void setUpdateColorTimer() {
+	glutTimerFunc(100 /* ms */, updateColor, 0);
+}
+
+
+void updateColor(int value) {
+	if (!change_color) {
+		setUpdateColorTimer();
+		return;
+	}
+	auto next_color_idx = (color_idx + 1) % color_count;
+	color_transition_step++;
+	if (color_transition_step >= kMaxColorTransitionStep) {
+		color_idx = next_color_idx;
+		color_transition_step = 0;
+		next_color_idx = (next_color_idx + 1) % color_count;
+	}
+	const auto& c1 = diffColors[color_idx];
+	const auto& c2 = diffColors[next_color_idx];
+	current_color[0] = c1[0] + (c2[0] - c1[0]) * color_transition_step / kMaxColorTransitionStep;
+	current_color[1] = c1[1] + (c2[1] - c1[1]) * color_transition_step / kMaxColorTransitionStep;
+	current_color[2] = c1[2] + (c2[2] - c1[2]) * color_transition_step / kMaxColorTransitionStep;
+	setUpdateColorTimer();
+	drawScene();
+}
+
+
 // This function is called whenever a "Normal" key press is received.
 void keyboardFunc( unsigned char key, int x, int y )
 {
@@ -53,8 +98,8 @@ void keyboardFunc( unsigned char key, int x, int y )
         exit(0);
         break;
     case 'c':
-        // add code to change color here
-        color_idx = (color_idx + 1) % color_count;
+        // add code to change color here 
+		change_color = !change_color;
         break;
     case 'd':
 	// Next drawable object.
@@ -142,14 +187,8 @@ void drawScene(void)
 
     // Set material properties of object
 
-	// Here are some colors you might use - feel free to add more
-    GLfloat diffColors[4][4] = { {0.5, 0.5, 0.9, 1.0},
-                                 {0.9, 0.5, 0.5, 1.0},
-                                 {0.5, 0.9, 0.3, 1.0},
-                                 {0.3, 0.8, 0.9, 1.0} };
-
 	// Here we use the first color entry as the diffuse color
-    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, diffColors[color_idx]);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, current_color);
 
 	// Define specular color and shininess
     GLfloat specColor[] = {1.0, 1.0, 1.0, 1.0};
@@ -266,8 +305,8 @@ int main( int argc, char** argv )
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH );
 
     // Initial parameters for window position and size
-    glutInitWindowPosition( 60, 60 );
-    glutInitWindowSize( 360, 360 );
+    glutInitWindowPosition( 260, 260 );
+    glutInitWindowSize( 720, 720 );
     glutCreateWindow("Assignment 0");
 
     // Initialize OpenGL parameters.
@@ -282,6 +321,9 @@ int main( int argc, char** argv )
 
     // Call this whenever window needs redrawing
     glutDisplayFunc( drawScene );
+
+	// Callback for color transitioning.
+	setUpdateColorTimer();
 
     // Start the main loop.  glutMainLoop never returns.
     glutMainLoop( );
