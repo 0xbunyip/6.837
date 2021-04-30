@@ -8,18 +8,27 @@ using namespace std;
 
 // Globals
 
-// This is the list of points (3D vectors)
-vector<Vector3f> vecv;
+class DrawableObject {
+public:
+    DrawableObject(vector<Vector3f>&& _vecv, vector<Vector3f>&& _vecn, vector<vector<unsigned> >&& _vecf): 
+        vecv(_vecv), vecn(_vecn), vecf(_vecf) { }
 
-// This is the list of normals (also 3D vectors)
-vector<Vector3f> vecn;
+    // This is the list of points (3D vectors)
+    vector<Vector3f> vecv;
 
-// This is the list of faces (indices into vecv and vecn)
-vector<vector<unsigned> > vecf;
+    // This is the list of normals (also 3D vectors)
+    vector<Vector3f> vecn;
+
+    // This is the list of faces (indices into vecv and vecn)
+    vector<vector<unsigned> > vecf;
+};
+
+vector<DrawableObject> draw_objects;
 
 constexpr int MAX_BUFFER_SIZE = 255;
 constexpr int color_count = 4;
 int color_idx = 0;
+int drawing_obj_idx = 0;
 
 GLfloat Lt0pos[] = {1.0f, 1.0f, 5.0f, 1.0f};
 
@@ -47,6 +56,10 @@ void keyboardFunc( unsigned char key, int x, int y )
         // add code to change color here
         color_idx = (color_idx + 1) % color_count;
         break;
+    case 'd':
+	// Next drawable object.
+	drawing_obj_idx = (drawing_obj_idx + 1) % draw_objects.size();
+	break;
     default:
         cout << "Unhandled key press " << key << "." << endl;
     }
@@ -85,6 +98,10 @@ void specialFunc( int key, int x, int y )
 
 void drawObject() {
     glBegin(GL_TRIANGLES);
+    const auto& obj = draw_objects[drawing_obj_idx];
+    const auto& vecf = obj.vecf;
+    const auto& vecv = obj.vecv;
+    const auto& vecn = obj.vecn;
     for (const auto& face : vecf) {
         auto a = face[0];
         auto b = face[1];
@@ -191,6 +208,12 @@ void loadInput()
 {
 	// load the OBJ file here
     char buffer[MAX_BUFFER_SIZE];
+
+    // Store latest obj.
+    vector<Vector3f> vecv;
+    vector<Vector3f> vecn;
+    vector<vector<unsigned> > vecf;
+
     while (cin.getline(buffer, MAX_BUFFER_SIZE)) {
         stringstream ss(buffer);
         string token = "";
@@ -213,7 +236,21 @@ void loadInput()
                     &a, &b, &c, &d, &e, &f, &g, &h, &i);
             // cout << line << " " << a << " " << i << endl;
             vecf.push_back({a, b, c, d, e, f, g, h, i});
+        } else if (token == "#") {
+            // Start of file
+            if (!vecf.empty()) {
+                draw_objects.emplace_back(std::move(vecv), std::move(vecn), std::move(vecf));
+		vecv.clear();
+		vecf.clear();
+		vecn.clear();
+            }
         }
+    }
+    if (!vecf.empty()) {
+	draw_objects.emplace_back(std::move(vecv), std::move(vecn), std::move(vecf));
+	vecv.clear();
+	vecf.clear();
+	vecn.clear();
     }
 }
 
