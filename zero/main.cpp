@@ -83,6 +83,28 @@ void specialFunc( int key, int x, int y )
     glutPostRedisplay();
 }
 
+void drawObject() {
+    glBegin(GL_TRIANGLES);
+    for (const auto& face : vecf) {
+        auto a = face[0];
+        auto b = face[1];
+        auto c = face[2];
+        auto d = face[3];
+        auto e = face[4];
+        auto f = face[5];
+        auto g = face[6];
+        auto h = face[7];
+        auto i = face[8];
+        glNormal3d(vecn[c-1][0], vecn[c-1][1], vecn[c-1][2]);
+        glVertex3d(vecv[a-1][0], vecv[a-1][1], vecv[a-1][2]);
+        glNormal3d(vecn[f-1][0], vecn[f-1][1], vecn[f-1][2]);
+        glVertex3d(vecv[d-1][0], vecv[d-1][1], vecv[d-1][2]);
+        glNormal3d(vecn[i-1][0], vecn[i-1][1], vecn[i-1][2]);
+        glVertex3d(vecv[g-1][0], vecv[g-1][1], vecv[g-1][2]);
+    }
+    glEnd();
+}
+
 // This function is responsible for displaying the object.
 void drawScene(void)
 {
@@ -131,11 +153,11 @@ void drawScene(void)
 
 	// This GLUT method draws a teapot.  You should replace
 	// it with code which draws the object you loaded.
-	glutSolidTeapot(1.0);
+	// glutSolidTeapot(1.0);
+    drawObject();
 
     // Dump the image to the screen.
     glutSwapBuffers();
-
 
 }
 
@@ -189,7 +211,7 @@ void loadInput()
             sscanf(line.c_str(),
                     " %u/%u/%u %u/%u/%u %u/%u/%u",
                     &a, &b, &c, &d, &e, &f, &g, &h, &i);
-            cout << line << " " << a << " " << i << endl;
+            // cout << line << " " << a << " " << i << endl;
             vecf.push_back({a, b, c, d, e, f, g, h, i});
         }
     }
