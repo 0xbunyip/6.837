@@ -8,9 +8,10 @@ using namespace std;
 
 // Globals
 
+// #################### Objects ####################
 class DrawableObject {
 public:
-    DrawableObject(vector<Vector3f>&& _vecv, vector<Vector3f>&& _vecn, vector<vector<unsigned> >&& _vecf): 
+    DrawableObject(vector<Vector3f>&& _vecv, vector<Vector3f>&& _vecn, vector<vector<unsigned> >&& _vecf):
         vecv(_vecv), vecn(_vecn), vecf(_vecf) { }
 
     // This is the list of points (3D vectors)
@@ -23,11 +24,13 @@ public:
     vector<vector<unsigned> > vecf;
 };
 
+constexpr int MAX_BUFFER_SIZE = 255;
 vector<DrawableObject> draw_objects;
 int drawing_obj_idx = 0;
 
+// #################### Colors ####################
 // Here are some colors you might use - feel free to add more
-GLfloat diffColors[][4] = { 
+GLfloat diffColors[][4] = {
 	{1.0, 0.0, 0.0, 1.0},
 	{1.0, 0.0, 1.0, 1.0},
 	{0.7, 0.0, 1.0, 1.0},
@@ -37,17 +40,16 @@ GLfloat diffColors[][4] = {
 	{1.0, 1.0, 0.0, 1.0},
 };
 GLfloat* current_color = diffColors[0];
-
 constexpr int color_count = sizeof(diffColors) / sizeof(*diffColors);
 bool change_color = false;
 int color_idx = 0;
 int color_transition_step = 0;
 constexpr int kMaxColorTransitionStep = 20;
 
+// #################### Lights ####################
 GLfloat Lt0pos[] = {1.0f, 1.0f, 5.0f, 1.0f};
 
 // You will need more global variables to implement color and position changes
-constexpr int MAX_BUFFER_SIZE = 255;
 
 
 // These are convenience functions which allow us to call OpenGL
@@ -98,7 +100,7 @@ void keyboardFunc( unsigned char key, int x, int y )
         exit(0);
         break;
     case 'c':
-        // add code to change color here 
+        // add code to change color here
 		change_color = !change_color;
         break;
     case 'd':
@@ -286,10 +288,10 @@ void loadInput()
         }
     }
     if (!vecf.empty()) {
-	draw_objects.emplace_back(std::move(vecv), std::move(vecn), std::move(vecf));
-	vecv.clear();
-	vecf.clear();
-	vecn.clear();
+        draw_objects.emplace_back(std::move(vecv), std::move(vecn), std::move(vecf));
+        vecv.clear();
+        vecf.clear();
+        vecn.clear();
     }
 }
 
