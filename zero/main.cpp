@@ -23,6 +23,8 @@ public:
 
     // This is the list of faces (indices into vecv and vecn)
     vector<vector<unsigned> > vecf;
+
+    GLuint display_list_id_;
 };
 
 constexpr int MAX_BUFFER_SIZE = 255;
@@ -169,29 +171,8 @@ void specialFunc( int key, int x, int y )
 }
 
 void drawObject() {
-    glBegin(GL_TRIANGLES);
-    const auto& obj = draw_objects[drawing_obj_idx];
-    const auto& vecf = obj.vecf;
-    const auto& vecv = obj.vecv;
-    const auto& vecn = obj.vecn;
-    for (const auto& face : vecf) {
-        auto a = face[0];
-        auto b = face[1];
-        auto c = face[2];
-        auto d = face[3];
-        auto e = face[4];
-        auto f = face[5];
-        auto g = face[6];
-        auto h = face[7];
-        auto i = face[8];
-        glNormal3d(vecn[c-1][0], vecn[c-1][1], vecn[c-1][2]);
-        glVertex3d(vecv[a-1][0], vecv[a-1][1], vecv[a-1][2]);
-        glNormal3d(vecn[f-1][0], vecn[f-1][1], vecn[f-1][2]);
-        glVertex3d(vecv[d-1][0], vecv[d-1][1], vecv[d-1][2]);
-        glNormal3d(vecn[i-1][0], vecn[i-1][1], vecn[i-1][2]);
-        glVertex3d(vecv[g-1][0], vecv[g-1][1], vecv[g-1][2]);
-    }
-    glEnd();
+    // draw the display list
+    glCallList(draw_objects[drawing_obj_idx].display_list_id_);
 }
 
 // This function is responsible for displaying the object.
@@ -270,6 +251,50 @@ void reshapeFunc(int w, int h)
     gluPerspective(50.0, 1.0, 1.0, 100.0);
 }
 
+void AddObjectsToDisplayList() {
+    // create display list
+    GLuint index = glGenLists(draw_objects.size());
+    if (!index) {
+        cout << "ERROR: failed to init display list!" << endl;
+        return;
+    }
+
+    int i = 0;
+    for (auto& obj : draw_objects) {
+        const auto& vecf = obj.vecf;
+        const auto& vecv = obj.vecv;
+        const auto& vecn = obj.vecn;
+
+        // compile the display list
+        glNewList(index + i, GL_COMPILE);
+        obj.display_list_id_= index + i;
+        i++;
+
+        glBegin(GL_TRIANGLES);
+        for (const auto& face : vecf) {
+            auto a = face[0];
+            auto b = face[1];
+            auto c = face[2];
+            auto d = face[3];
+            auto e = face[4];
+            auto f = face[5];
+            auto g = face[6];
+            auto h = face[7];
+            auto i = face[8];
+            glNormal3d(vecn[c-1][0], vecn[c-1][1], vecn[c-1][2]);
+            glVertex3d(vecv[a-1][0], vecv[a-1][1], vecv[a-1][2]);
+            glNormal3d(vecn[f-1][0], vecn[f-1][1], vecn[f-1][2]);
+            glVertex3d(vecv[d-1][0], vecv[d-1][1], vecv[d-1][2]);
+            glNormal3d(vecn[i-1][0], vecn[i-1][1], vecn[i-1][2]);
+            glVertex3d(vecv[g-1][0], vecv[g-1][1], vecv[g-1][2]);
+        }
+        glEnd();
+
+        // End list.
+        glEndList();
+    }
+}
+
 void loadInput()
 {
 	// load the OBJ file here
@@ -338,6 +363,9 @@ int main( int argc, char** argv )
 
     // Initialize OpenGL parameters.
     initRendering();
+
+    // Add drawable objects to display list once.
+    AddObjectsToDisplayList();
 
     // Set up callback functions for key presses
     glutKeyboardFunc(keyboardFunc); // Handles "normal" ascii symbols
