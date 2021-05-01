@@ -53,11 +53,13 @@ constexpr int kMaxColorTransitionStep = 20;
 GLfloat Lt0pos[] = {1.0f, 1.0f, 5.0f, 1.0f};
 
 // #################### Camera ####################
-constexpr float kCameraAngleDelta = PI * 0.01;
+constexpr float kCameraAngleDelta = PI * 0.1;
 constexpr float kCameraDistance = 5.0;
-float camera_angle = 0.0; // On z-axis.
+constexpr float kCameraDistanceSqr = kCameraDistance * kCameraDistance;
+Vector3f camera_position(0.0, 0.0, kCameraDistance);
+float theta = 0.0; // Rotating around y-axis.
+float alpha = PI / 2; // Rotating around x-axis.
 bool rotating_camera = false;
-Vector3f camera_position(0.0, 0.0, 5.0);
 
 // You will need more global variables to implement color and position changes
 
@@ -76,7 +78,7 @@ void updateColor(int);
 void drawScene(void);
 
 void setUpdateCameraTimer() {
-	glutTimerFunc(100 /* ms */, [](int value) {
+	glutTimerFunc(1000 /* ms */, [](int value) {
         updateCamera(value);
         setUpdateCameraTimer();
     }, 0);
@@ -84,9 +86,32 @@ void setUpdateCameraTimer() {
 
 void updateCamera(int value) {
     if (!rotating_camera) return;
-    camera_angle += kCameraAngleDelta;
-    camera_position.z() = kCameraDistance * cos(camera_angle);
-    camera_position.x() = kCameraDistance * sin(camera_angle);
+    // cout << camera_position.x() * camera_position.x() +
+    //     camera_position.y() * camera_position.y() +
+    //     camera_position.z() * camera_position.z() << " ";
+
+    // Rotate around y-axis.
+    // theta += kCameraAngleDelta;
+    // const auto y = camera_position.y();
+    // const auto radius_at_y = sqrt(kCameraDistanceSqr - y * y);
+    // camera_position.z() = radius_at_y * cos(theta);
+    // camera_position.x() = radius_at_y * sin(theta);
+
+    // Rotate around x-axis.
+    alpha -= kCameraAngleDelta;
+    const auto x = camera_position.x();
+    const auto radius_at_x = sqrt(kCameraDistanceSqr - x * x);
+    camera_position.y() = radius_at_x * cos(alpha);
+    camera_position.z() = radius_at_x * sin(alpha);
+
+    cout << camera_position.x() << " " << camera_position.y() << " " << camera_position.z() << endl;
+
+    // cout << camera_position.x() * camera_position.x() +
+    //     camera_position.y() * camera_position.y() +
+    //     camera_position.z() * camera_position.z() << endl;
+
+    // cout << "radius_at_y: " << radius_at_y << endl;
+
     drawScene();
 }
 
@@ -178,8 +203,6 @@ void drawObject() {
 // This function is responsible for displaying the object.
 void drawScene(void)
 {
-    int i;
-
     // Clear the rendering window
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
