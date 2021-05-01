@@ -7,6 +7,7 @@
 using namespace std;
 
 // Globals
+constexpr float PI = M_PI;
 
 // #################### Objects ####################
 class DrawableObject {
@@ -49,6 +50,13 @@ constexpr int kMaxColorTransitionStep = 20;
 // #################### Lights ####################
 GLfloat Lt0pos[] = {1.0f, 1.0f, 5.0f, 1.0f};
 
+// #################### Camera ####################
+constexpr float kCameraAngleDelta = PI * 0.01;
+constexpr float kCameraDistance = 5.0;
+float camera_angle = 0.0; // On z-axis.
+bool rotating_camera = false;
+Vector3f camera_position(0.0, 0.0, 5.0);
+
 // You will need more global variables to implement color and position changes
 
 
@@ -61,19 +69,34 @@ inline void glNormal(const Vector3f &a)
 { glNormal3fv(a); }
 
 
+void updateCamera(int);
 void updateColor(int);
 void drawScene(void);
 
-void setUpdateColorTimer() {
-	glutTimerFunc(100 /* ms */, updateColor, 0);
+void setUpdateCameraTimer() {
+	glutTimerFunc(100 /* ms */, [](int value) {
+        updateCamera(value);
+        setUpdateCameraTimer();
+    }, 0);
 }
 
+void updateCamera(int value) {
+    if (!rotating_camera) return;
+    camera_angle += kCameraAngleDelta;
+    camera_position.z() = kCameraDistance * cos(camera_angle);
+    camera_position.x() = kCameraDistance * sin(camera_angle);
+    drawScene();
+}
+
+void setUpdateColorTimer() {
+	glutTimerFunc(100 /* ms */, [](int value) {
+        updateColor(value);
+        setUpdateColorTimer();
+    }, 0);
+}
 
 void updateColor(int value) {
-	if (!change_color) {
-		setUpdateColorTimer();
-		return;
-	}
+	if (!change_color) return;
 	auto next_color_idx = (color_idx + 1) % color_count;
 	color_transition_step++;
 	if (color_transition_step >= kMaxColorTransitionStep) {
@@ -86,10 +109,8 @@ void updateColor(int value) {
 	current_color[0] = c1[0] + (c2[0] - c1[0]) * color_transition_step / kMaxColorTransitionStep;
 	current_color[1] = c1[1] + (c2[1] - c1[1]) * color_transition_step / kMaxColorTransitionStep;
 	current_color[2] = c1[2] + (c2[2] - c1[2]) * color_transition_step / kMaxColorTransitionStep;
-	setUpdateColorTimer();
 	drawScene();
 }
-
 
 // This function is called whenever a "Normal" key press is received.
 void keyboardFunc( unsigned char key, int x, int y )
@@ -104,9 +125,13 @@ void keyboardFunc( unsigned char key, int x, int y )
 		change_color = !change_color;
         break;
     case 'd':
-	// Next drawable object.
-	drawing_obj_idx = (drawing_obj_idx + 1) % draw_objects.size();
-	break;
+        // Next drawable object.
+        drawing_obj_idx = (drawing_obj_idx + 1) % draw_objects.size();
+        break;
+    case 'r':
+        // Rotate.
+        rotating_camera = !rotating_camera;
+        break;
     default:
         cout << "Unhandled key press " << key << "." << endl;
     }
@@ -183,7 +208,7 @@ void drawScene(void)
 
     // Position the camera at [0,0,5], looking at [0,0,0],
     // with [0,1,0] as the up direction.
-    gluLookAt(0.0, 0.0, 5.0,
+    gluLookAt(camera_position.x(), camera_position.y(), camera_position.z(),
               0.0, 0.0, 0.0,
               0.0, 1.0, 0.0);
 
@@ -281,9 +306,9 @@ void loadInput()
             // Start of file
             if (!vecf.empty()) {
                 draw_objects.emplace_back(std::move(vecv), std::move(vecn), std::move(vecf));
-		vecv.clear();
-		vecf.clear();
-		vecn.clear();
+                vecv.clear();
+                vecf.clear();
+                vecn.clear();
             }
         }
     }
@@ -326,6 +351,9 @@ int main( int argc, char** argv )
 
 	// Callback for color transitioning.
 	setUpdateColorTimer();
+
+	// Callback for camera rotation.
+	setUpdateCameraTimer();
 
     // Start the main loop.  glutMainLoop never returns.
     glutMainLoop( );
