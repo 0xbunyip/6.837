@@ -53,10 +53,11 @@ constexpr int kMaxColorTransitionStep = 20;
 GLfloat Lt0pos[] = {1.0f, 1.0f, 5.0f, 1.0f};
 
 // #################### Camera ####################
-constexpr float kCameraAngleDelta = PI * 0.1;
+constexpr float kCameraAngleDelta = PI * 0.01;
 constexpr float kCameraDistance = 5.0;
 constexpr float kCameraDistanceSqr = kCameraDistance * kCameraDistance;
 Vector3f camera_position(0.0, 0.0, kCameraDistance);
+Vector3f camera_up(0.0, 1.0, 0.0);
 float theta = 0.0; // Rotating around y-axis.
 float alpha = PI / 2; // Rotating around x-axis.
 bool rotating_camera = false;
@@ -78,7 +79,7 @@ void updateColor(int);
 void drawScene(void);
 
 void setUpdateCameraTimer() {
-	glutTimerFunc(1000 /* ms */, [](int value) {
+	glutTimerFunc(16 /* ms */, [](int value) {
         updateCamera(value);
         setUpdateCameraTimer();
     }, 0);
@@ -91,11 +92,11 @@ void updateCamera(int value) {
     //     camera_position.z() * camera_position.z() << " ";
 
     // Rotate around y-axis.
-    // theta += kCameraAngleDelta;
-    // const auto y = camera_position.y();
-    // const auto radius_at_y = sqrt(kCameraDistanceSqr - y * y);
-    // camera_position.z() = radius_at_y * cos(theta);
-    // camera_position.x() = radius_at_y * sin(theta);
+    theta += kCameraAngleDelta;
+    const auto y = camera_position.y();
+    const auto radius_at_y = sqrt(kCameraDistanceSqr - y * y);
+    camera_position.z() = radius_at_y * cos(theta);
+    camera_position.x() = radius_at_y * sin(theta);
 
     // Rotate around x-axis.
     alpha -= kCameraAngleDelta;
@@ -104,7 +105,7 @@ void updateCamera(int value) {
     camera_position.y() = radius_at_x * cos(alpha);
     camera_position.z() = radius_at_x * sin(alpha);
 
-    cout << camera_position.x() << " " << camera_position.y() << " " << camera_position.z() << endl;
+    // cout << camera_position.x() << " " << camera_position.y() << " " << camera_position.z() << endl;
 
     // cout << camera_position.x() * camera_position.x() +
     //     camera_position.y() * camera_position.y() +
@@ -112,6 +113,10 @@ void updateCamera(int value) {
 
     // cout << "radius_at_y: " << radius_at_y << endl;
 
+    auto look_vector = camera_position;
+    look_vector.negate();
+    camera_up = Vector3f::cross(Vector3f::RIGHT, look_vector);
+    // cout << "up: " << camera_up.x() << " " << camera_up.y() << " " << camera_up.z() << endl;
     drawScene();
 }
 
@@ -214,7 +219,7 @@ void drawScene(void)
     // with [0,1,0] as the up direction.
     gluLookAt(camera_position.x(), camera_position.y(), camera_position.z(),
               0.0, 0.0, 0.0,
-              0.0, 1.0, 0.0);
+              camera_up.x(), camera_up.y(), camera_up.z());
 
     // Set material properties of object
 
