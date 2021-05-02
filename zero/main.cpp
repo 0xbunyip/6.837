@@ -62,6 +62,10 @@ float theta = 0.0; // Rotating around y-axis.
 float alpha = PI / 2; // Rotating around x-axis.
 bool rotating_camera = false;
 
+// #################### Mouse ####################
+int mouse_x = -1;
+int mouse_y = -1;
+
 // You will need more global variables to implement color and position changes
 
 
@@ -77,6 +81,7 @@ inline void glNormal(const Vector3f &a)
 void updateCamera(int);
 void updateColor(int);
 void drawScene(void);
+void RotateCamera(float, float);
 
 void setUpdateCameraTimer() {
 	glutTimerFunc(16 /* ms */, [](int value) {
@@ -87,36 +92,7 @@ void setUpdateCameraTimer() {
 
 void updateCamera(int value) {
     if (!rotating_camera) return;
-    // cout << camera_position.x() * camera_position.x() +
-    //     camera_position.y() * camera_position.y() +
-    //     camera_position.z() * camera_position.z() << " ";
-
-    // Rotate around y-axis.
-    theta += kCameraAngleDelta;
-    const auto y = camera_position.y();
-    const auto radius_at_y = sqrt(kCameraDistanceSqr - y * y);
-    camera_position.z() = radius_at_y * cos(theta);
-    camera_position.x() = radius_at_y * sin(theta);
-
-    // Rotate around x-axis.
-    alpha -= kCameraAngleDelta;
-    const auto x = camera_position.x();
-    const auto radius_at_x = sqrt(kCameraDistanceSqr - x * x);
-    camera_position.y() = radius_at_x * cos(alpha);
-    camera_position.z() = radius_at_x * sin(alpha);
-
-    // cout << camera_position.x() << " " << camera_position.y() << " " << camera_position.z() << endl;
-
-    // cout << camera_position.x() * camera_position.x() +
-    //     camera_position.y() * camera_position.y() +
-    //     camera_position.z() * camera_position.z() << endl;
-
-    // cout << "radius_at_y: " << radius_at_y << endl;
-
-    auto look_vector = camera_position;
-    look_vector.negate();
-    camera_up = Vector3f::cross(Vector3f::RIGHT, look_vector);
-    // cout << "up: " << camera_up.x() << " " << camera_up.y() << " " << camera_up.z() << endl;
+    RotateCamera(kCameraAngleDelta, 0);
     drawScene();
 }
 
@@ -142,6 +118,72 @@ void updateColor(int value) {
 	current_color[1] = c1[1] + (c2[1] - c1[1]) * color_transition_step / kMaxColorTransitionStep;
 	current_color[2] = c1[2] + (c2[2] - c1[2]) * color_transition_step / kMaxColorTransitionStep;
 	drawScene();
+}
+
+void RotateCamera(float theta_diff, float alpha_diff) {
+    // cout << "rotate angle: " << theta_diff << " " << alpha_diff << endl;
+    // cout << camera_position.x() * camera_position.x() +
+    //     camera_position.y() * camera_position.y() +
+    //     camera_position.z() * camera_position.z() << " ";
+
+    // Rotate around y-axis.
+    theta += theta_diff;
+    cout << "theta: " << theta << endl;
+    const auto y = camera_position.y();
+    const auto radius_at_y = sqrt(kCameraDistanceSqr - y * y);
+    camera_position.z() = radius_at_y * cos(theta);
+    camera_position.x() = radius_at_y * sin(theta);
+
+    // Rotate around x-axis.
+    alpha -= alpha_diff;
+    const auto x = camera_position.x();
+    const auto radius_at_x = sqrt(kCameraDistanceSqr - x * x);
+    camera_position.y() = radius_at_x * cos(alpha);
+    camera_position.z() = radius_at_x * sin(alpha);
+
+    cout << "c/s theta: " << cos(theta) << " " << sin(theta) << endl;
+    cout << camera_position.x() << " " << camera_position.y() << " " << camera_position.z() << endl;
+
+    // cout << camera_position.x() * camera_position.x() +
+    //     camera_position.y() * camera_position.y() +
+    //     camera_position.z() * camera_position.z() << endl;
+
+    // cout << "radius_at_y: " << radius_at_y << endl;
+
+    auto look_vector = camera_position;
+    look_vector.negate();
+    camera_up = Vector3f::cross(Vector3f::RIGHT, look_vector);
+    // cout << "up: " << camera_up.x() << " " << camera_up.y() << " " << camera_up.z() << endl;
+}
+
+void mouseMotionFunc(int x, int y) {
+    cout << "motion: " << x << " " << y << endl;
+    int dx = x - mouse_x;
+    int dy = y - mouse_y;
+    mouse_x = x;
+    mouse_y = y;
+    float theta_diff = -dx * 0.01 / PI;
+    float alpha_diff = dy * 1.0 / PI;
+    RotateCamera(theta_diff, 0);
+    drawScene();
+}
+
+void mouseFunc(int button, int state, int x, int y) {
+    switch (button) {
+    case GLUT_LEFT_BUTTON:
+        if (state == GLUT_DOWN) {
+            cout << "GLUT_DOWN: " << x << " " << y << endl;
+            mouse_x = x;
+            mouse_y = y;
+        }
+        break;
+
+    case GLUT_MIDDLE_BUTTON:
+        break;
+
+    case GLUT_RIGHT_BUTTON:
+        break;
+    }
 }
 
 // This function is called whenever a "Normal" key press is received.
@@ -398,6 +440,10 @@ int main( int argc, char** argv )
     // Set up callback functions for key presses
     glutKeyboardFunc(keyboardFunc); // Handles "normal" ascii symbols
     glutSpecialFunc(specialFunc);   // Handles "special" keyboard keys
+
+    // Set up callback functions for mouse presses.
+    glutMouseFunc(mouseFunc);
+    glutMotionFunc(mouseMotionFunc);
 
      // Set up the callback function for resizing windows
     glutReshapeFunc( reshapeFunc );
