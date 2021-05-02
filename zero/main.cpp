@@ -53,6 +53,18 @@ constexpr int kMaxColorTransitionStep = 20;
 GLfloat Lt0pos[] = {1.0f, 1.0f, 5.0f, 1.0f};
 
 // #################### Camera ####################
+struct CameraAngle {
+    float theta; // Angle between Oz and vector projected to Oxz.
+    float alpha; // Angle between Oy and vector projected to Oyz.
+
+    friend ostream& operator<<(ostream& os, const CameraAngle& angle);
+};
+
+ostream& operator<<(ostream& os, const CameraAngle& angle) {
+    os << "<" << angle.theta << ", " << angle.alpha << ">";
+    return os;
+}
+
 constexpr float kCameraAngleDelta = PI * 0.01;
 constexpr float kCameraDistance = 5.0;
 constexpr float kCameraDistanceSqr = kCameraDistance * kCameraDistance;
@@ -82,9 +94,10 @@ void updateCamera(int);
 void updateColor(int);
 void drawScene(void);
 void RotateCamera(float, float);
+CameraAngle ComputeAngle(const Vector3f&);
 
 void setUpdateCameraTimer() {
-	glutTimerFunc(16 /* ms */, [](int value) {
+	glutTimerFunc(160 /* ms */, [](int value) {
         updateCamera(value);
         setUpdateCameraTimer();
     }, 0);
@@ -93,6 +106,7 @@ void setUpdateCameraTimer() {
 void updateCamera(int value) {
     if (!rotating_camera) return;
     RotateCamera(kCameraAngleDelta, 0);
+    // cout << "camera angle: " << ComputeAngle(camera_position) << endl;
     drawScene();
 }
 
@@ -120,29 +134,64 @@ void updateColor(int value) {
 	drawScene();
 }
 
+CameraAngle ComputeAngle(const Vector3f& pos) {
+    // Project to xz plane.
+    auto xz_norm = pos.xz().abs();
+    auto theta = 0.0f;
+    if (xz_norm < 1e-6) {
+        if (pos.y() > 0) {
+            theta = PI / 2;
+        } else {
+            theta = -PI / 2;
+        }
+    } else {
+        theta = acos(pos.z() / xz_norm);
+    }
+
+    // Project to yz plane.
+    auto yz_norm = pos.yz().abs();
+    auto alpha = 0.0f;
+    if (yz_norm < 1e-6) {
+        if (pos.x() > 0) {
+            alpha = PI / 2;
+        } else {
+            alpha = -PI / 2;
+        }
+    } else {
+        alpha = acos(pos.y() / yz_norm);
+    }
+
+    return CameraAngle{theta, alpha};
+}
+
 void RotateCamera(float theta_diff, float alpha_diff) {
     // cout << "rotate angle: " << theta_diff << " " << alpha_diff << endl;
     // cout << camera_position.x() * camera_position.x() +
     //     camera_position.y() * camera_position.y() +
     //     camera_position.z() * camera_position.z() << " ";
 
+    cout << "camera pos: ";
+    camera_position.print();
+
     // Rotate around y-axis.
-    theta += theta_diff;
-    cout << "theta: " << theta << endl;
+    auto camera_angle = ComputeAngle(camera_position);
+    camera_angle.theta += theta_diff;
+    cout << "camera angle #1: " << camera_angle << endl;
     const auto y = camera_position.y();
     const auto radius_at_y = sqrt(kCameraDistanceSqr - y * y);
-    camera_position.z() = radius_at_y * cos(theta);
-    camera_position.x() = radius_at_y * sin(theta);
+    camera_position.z() = radius_at_y * cos(camera_angle.theta);
+    camera_position.x() = radius_at_y * sin(camera_angle.theta);
 
     // Rotate around x-axis.
-    alpha -= alpha_diff;
+    camera_angle = ComputeAngle(camera_position); // Recompute camera angle.
+    cout << "camera angle #2: " << camera_angle << endl;
+    camera_angle.alpha -= alpha_diff;
     const auto x = camera_position.x();
     const auto radius_at_x = sqrt(kCameraDistanceSqr - x * x);
-    camera_position.y() = radius_at_x * cos(alpha);
-    camera_position.z() = radius_at_x * sin(alpha);
+    camera_position.y() = radius_at_x * cos(camera_angle.alpha);
+    camera_position.z() = radius_at_x * sin(camera_angle.alpha);
 
     cout << "c/s theta: " << cos(theta) << " " << sin(theta) << endl;
-    cout << camera_position.x() << " " << camera_position.y() << " " << camera_position.z() << endl;
 
     // cout << camera_position.x() * camera_position.x() +
     //     camera_position.y() * camera_position.y() +
