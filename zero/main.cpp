@@ -65,7 +65,7 @@ ostream& operator<<(ostream& os, const CameraAngle& angle) {
     return os;
 }
 
-constexpr float kCameraAngleDelta = PI * 0.01;
+constexpr float kCameraAngleDelta = PI * 0.02;
 constexpr float kCameraDistance = 5.0;
 constexpr float kCameraDistanceSqr = kCameraDistance * kCameraDistance;
 Vector3f camera_position(0.0, 0.0, kCameraDistance);
@@ -97,7 +97,7 @@ void RotateCamera(float, float);
 CameraAngle ComputeAngle(const Vector3f&);
 
 void setUpdateCameraTimer() {
-	glutTimerFunc(160 /* ms */, [](int value) {
+	glutTimerFunc(80 /* ms */, [](int value) {
         updateCamera(value);
         setUpdateCameraTimer();
     }, 0);
@@ -136,44 +136,41 @@ void updateColor(int value) {
 
 CameraAngle ComputeAngle(const Vector3f& pos) {
     // Project to xz plane.
-    auto xz_norm = pos.xz().abs();
-    auto theta = 0.0f;
-    if (xz_norm < 1e-6) {
-        if (pos.y() > 0) {
-            theta = PI / 2;
-        } else {
-            theta = -PI / 2;
+    auto theta = PI / 2;
+    if (abs(pos.x()) > 1e-3 || abs(pos.z()) > 1e-3) {
+        theta = acos(pos.z() / pos.xz().abs());
+        const auto cross_xz = Vector3f::cross(pos, -Vector3f::FORWARD);
+        if (Vector3f::dot(Vector3f::UP, cross_xz) > 0) {
+            theta = -theta;
         }
-    } else {
-        theta = acos(pos.z() / xz_norm);
     }
 
     // Project to yz plane.
-    auto yz_norm = pos.yz().abs();
-    auto alpha = 0.0f;
-    if (yz_norm < 1e-6) {
-        if (pos.x() > 0) {
-            alpha = PI / 2;
-        } else {
-            alpha = -PI / 2;
+    auto alpha = PI / 2;
+    if (abs(pos.y()) > 1e-3 || abs(pos.z()) > 1e-3) {
+        cout << "computing alpha: " << pos.x() << " " << pos.y() << " " << pos.z() << endl;
+        alpha = acos(pos.y() / pos.yz().abs());
+        const auto cross_yz = Vector3f::cross(pos, Vector3f::UP);
+        cout << "cross_yz: ";
+        cross_yz.print();
+        if (Vector3f::dot(Vector3f::RIGHT, cross_yz) > 0) {
+            alpha = -alpha;
         }
-    } else {
-        alpha = acos(pos.y() / yz_norm);
     }
 
     return CameraAngle{theta, alpha};
 }
 
 void RotateCamera(float theta_diff, float alpha_diff) {
+    cout << "#################################################" << endl;
     // cout << "rotate angle: " << theta_diff << " " << alpha_diff << endl;
     // cout << camera_position.x() * camera_position.x() +
     //     camera_position.y() * camera_position.y() +
     //     camera_position.z() * camera_position.z() << " ";
 
+    // Rotate around y-axis.
     cout << "camera pos: ";
     camera_position.print();
-
-    // Rotate around y-axis.
     auto camera_angle = ComputeAngle(camera_position);
     camera_angle.theta += theta_diff;
     cout << "camera angle #1: " << camera_angle << endl;
@@ -183,25 +180,31 @@ void RotateCamera(float theta_diff, float alpha_diff) {
     camera_position.x() = radius_at_y * sin(camera_angle.theta);
 
     // Rotate around x-axis.
-    camera_angle = ComputeAngle(camera_position); // Recompute camera angle.
-    cout << "camera angle #2: " << camera_angle << endl;
-    camera_angle.alpha -= alpha_diff;
-    const auto x = camera_position.x();
-    const auto radius_at_x = sqrt(kCameraDistanceSqr - x * x);
-    camera_position.y() = radius_at_x * cos(camera_angle.alpha);
-    camera_position.z() = radius_at_x * sin(camera_angle.alpha);
+    cout << "camera pos #2: ";
+    camera_position.print();
+    if (camera_position.yz().absSquared() > 1e-6) {
+        camera_angle = ComputeAngle(camera_position); // Recompute camera angle.
+        cout << "camera angle #2: " << camera_angle << endl;
+        camera_angle.alpha -= alpha_diff;
+        const auto x = camera_position.x();
+        const auto radius_at_x = sqrt(kCameraDistanceSqr - x * x);
+        camera_position.y() = radius_at_x * cos(camera_angle.alpha);
+        camera_position.z() = radius_at_x * sin(camera_angle.alpha);
+    }
 
     cout << "c/s theta: " << cos(theta) << " " << sin(theta) << endl;
 
     // cout << camera_position.x() * camera_position.x() +
     //     camera_position.y() * camera_position.y() +
     //     camera_position.z() * camera_position.z() << endl;
+    cout << "camera pos #3: ";
+    camera_position.print();
 
     // cout << "radius_at_y: " << radius_at_y << endl;
 
-    auto look_vector = camera_position;
-    look_vector.negate();
-    camera_up = Vector3f::cross(Vector3f::RIGHT, look_vector);
+    camera_up = Vector3f::cross(camera_position, Vector3f::RIGHT);
+    cout << "up vector: ";
+    camera_up.print();
     // cout << "up: " << camera_up.x() << " " << camera_up.y() << " " << camera_up.z() << endl;
 }
 
