@@ -90,6 +90,9 @@ inline void glNormal(const Vector3f &a)
 { glNormal3fv(a); }
 
 
+#define LOG(x) cout << #x << ": " << x << endl
+
+
 void updateCamera(int);
 void updateColor(int);
 void drawScene(void);
@@ -97,7 +100,7 @@ void RotateCamera(float, float);
 CameraAngle ComputeAngle(const Vector3f&);
 
 void setUpdateCameraTimer() {
-	glutTimerFunc(80 /* ms */, [](int value) {
+	glutTimerFunc(16 /* ms */, [](int value) {
         updateCamera(value);
         setUpdateCameraTimer();
     }, 0);
@@ -105,8 +108,7 @@ void setUpdateCameraTimer() {
 
 void updateCamera(int value) {
     if (!rotating_camera) return;
-    RotateCamera(kCameraAngleDelta, 0);
-    // cout << "camera angle: " << ComputeAngle(camera_position) << endl;
+    RotateCamera(kCameraAngleDelta, kCameraAngleDelta);
     drawScene();
 }
 
@@ -161,6 +163,16 @@ CameraAngle ComputeAngle(const Vector3f& pos) {
     return CameraAngle{theta, alpha};
 }
 
+void UpdateCameraUp() {
+    auto last_camera_up = camera_up;
+    camera_up = Vector3f::cross(camera_position, Vector3f::RIGHT);
+    if (Vector3f::dot(camera_up, last_camera_up) < 0) {
+        camera_up = -camera_up;
+    }
+    cout << "up vector: ";
+    camera_up.print();
+}
+
 void RotateCamera(float theta_diff, float alpha_diff) {
     cout << "#################################################" << endl;
     // cout << "rotate angle: " << theta_diff << " " << alpha_diff << endl;
@@ -194,17 +206,12 @@ void RotateCamera(float theta_diff, float alpha_diff) {
 
     cout << "c/s theta: " << cos(theta) << " " << sin(theta) << endl;
 
-    // cout << camera_position.x() * camera_position.x() +
-    //     camera_position.y() * camera_position.y() +
-    //     camera_position.z() * camera_position.z() << endl;
     cout << "camera pos #3: ";
     camera_position.print();
 
     // cout << "radius_at_y: " << radius_at_y << endl;
 
-    camera_up = Vector3f::cross(camera_position, Vector3f::RIGHT);
-    cout << "up vector: ";
-    camera_up.print();
+    UpdateCameraUp();
     // cout << "up: " << camera_up.x() << " " << camera_up.y() << " " << camera_up.z() << endl;
 }
 
@@ -214,8 +221,8 @@ void mouseMotionFunc(int x, int y) {
     int dy = y - mouse_y;
     mouse_x = x;
     mouse_y = y;
-    float theta_diff = -dx * 0.01 / PI;
-    float alpha_diff = dy * 1.0 / PI;
+    float theta_diff = -dx * 0.02 / PI;
+    float alpha_diff = dy * 0.02 / PI;
     RotateCamera(theta_diff, 0);
     drawScene();
 }
@@ -479,7 +486,7 @@ int main( int argc, char** argv )
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH );
 
     // Initial parameters for window position and size
-    glutInitWindowPosition( 260, 260 );
+    glutInitWindowPosition( 600, 260 );
     glutInitWindowSize( 720, 720 );
     glutCreateWindow("Assignment 0");
 
