@@ -90,7 +90,13 @@ inline void glNormal(const Vector3f &a)
 { glNormal3fv(a); }
 
 
-#define LOG(x) cout << #x << ": " << x << endl
+#define DEBUG 0
+
+#ifdef DEBUG
+#  define LOG(x) cout << #x << ": " << x << endl
+#else
+#  define LOG(x)
+#endif
 
 
 void updateCamera(int);
@@ -150,11 +156,8 @@ CameraAngle ComputeAngle(const Vector3f& pos) {
     // Project to yz plane.
     auto alpha = PI / 2;
     if (abs(pos.y()) > 1e-3 || abs(pos.z()) > 1e-3) {
-        cout << "computing alpha: " << pos.x() << " " << pos.y() << " " << pos.z() << endl;
         alpha = acos(pos.y() / pos.yz().abs());
         const auto cross_yz = Vector3f::cross(pos, Vector3f::UP);
-        cout << "cross_yz: ";
-        cross_yz.print();
         if (Vector3f::dot(Vector3f::RIGHT, cross_yz) > 0) {
             alpha = -alpha;
         }
@@ -169,34 +172,20 @@ void UpdateCameraUp() {
     if (Vector3f::dot(camera_up, last_camera_up) < 0) {
         camera_up = -camera_up;
     }
-    cout << "up vector: ";
-    camera_up.print();
 }
 
 void RotateCamera(float theta_diff, float alpha_diff) {
-    cout << "#################################################" << endl;
-    // cout << "rotate angle: " << theta_diff << " " << alpha_diff << endl;
-    // cout << camera_position.x() * camera_position.x() +
-    //     camera_position.y() * camera_position.y() +
-    //     camera_position.z() * camera_position.z() << " ";
-
     // Rotate around y-axis.
-    cout << "camera pos: ";
-    camera_position.print();
     auto camera_angle = ComputeAngle(camera_position);
     camera_angle.theta += theta_diff;
-    cout << "camera angle #1: " << camera_angle << endl;
     const auto y = camera_position.y();
     const auto radius_at_y = sqrt(kCameraDistanceSqr - y * y);
     camera_position.z() = radius_at_y * cos(camera_angle.theta);
     camera_position.x() = radius_at_y * sin(camera_angle.theta);
 
     // Rotate around x-axis.
-    cout << "camera pos #2: ";
-    camera_position.print();
     if (camera_position.yz().absSquared() > 1e-6) {
         camera_angle = ComputeAngle(camera_position); // Recompute camera angle.
-        cout << "camera angle #2: " << camera_angle << endl;
         camera_angle.alpha -= alpha_diff;
         const auto x = camera_position.x();
         const auto radius_at_x = sqrt(kCameraDistanceSqr - x * x);
@@ -204,21 +193,13 @@ void RotateCamera(float theta_diff, float alpha_diff) {
         camera_position.z() = radius_at_x * sin(camera_angle.alpha);
     }
 
-    cout << "c/s theta: " << cos(theta) << " " << sin(theta) << endl;
-
-    cout << "camera pos #3: ";
-    camera_position.print();
-
-    // cout << "radius_at_y: " << radius_at_y << endl;
-
     UpdateCameraUp();
-    // cout << "up: " << camera_up.x() << " " << camera_up.y() << " " << camera_up.z() << endl;
 }
 
 void mouseMotionFunc(int x, int y) {
-    cout << "motion: " << x << " " << y << endl;
     int dx = x - mouse_x;
     int dy = y - mouse_y;
+    LOG(dx);
     mouse_x = x;
     mouse_y = y;
     float theta_diff = -dx * 0.02 / PI;
@@ -231,7 +212,6 @@ void mouseFunc(int button, int state, int x, int y) {
     switch (button) {
     case GLUT_LEFT_BUTTON:
         if (state == GLUT_DOWN) {
-            cout << "GLUT_DOWN: " << x << " " << y << endl;
             mouse_x = x;
             mouse_y = y;
         }
