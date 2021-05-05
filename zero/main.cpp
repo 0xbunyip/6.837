@@ -1,4 +1,6 @@
 #include <GL/glut.h>
+#include <chrono>
+#include <thread>
 #include <cmath>
 #include <iostream>
 #include <sstream>
@@ -8,6 +10,8 @@ using namespace std;
 
 // Globals
 constexpr float PI = M_PI;
+constexpr int kTargetFPS = 60;
+constexpr int kTargetFrameTime = static_cast<int>(1000.0 / kTargetFPS);
 
 // #################### Objects ####################
 class DrawableObject {
@@ -78,6 +82,9 @@ bool rotating_camera = false;
 int mouse_x = -1;
 int mouse_y = -1;
 
+// #################### Time ####################
+int world_clock = 0;
+
 // You will need more global variables to implement color and position changes
 
 
@@ -90,12 +97,14 @@ inline void glNormal(const Vector3f &a)
 { glNormal3fv(a); }
 
 
-#define DEBUG 0
+// #define DEBUG 1
 
 #ifdef DEBUG
-#  define LOG(x) cout << #x << ": " << x << endl
+#  define LOG(x) cout << "[L" << __LINE__ << "] " << #x << ": " << x << endl
+#  define LOGS(x) cout << "[L" << __LINE__ << "] " << x << endl
 #else
 #  define LOG(x)
+#  define LOGS(x)
 #endif
 
 
@@ -115,7 +124,7 @@ void setUpdateCameraTimer() {
 void updateCamera(int value) {
     if (!rotating_camera) return;
     RotateCamera(kCameraAngleDelta, kCameraAngleDelta);
-    drawScene();
+    // drawScene();
 }
 
 void setUpdateColorTimer() {
@@ -139,7 +148,7 @@ void updateColor(int value) {
 	current_color[0] = c1[0] + (c2[0] - c1[0]) * color_transition_step / kMaxColorTransitionStep;
 	current_color[1] = c1[1] + (c2[1] - c1[1]) * color_transition_step / kMaxColorTransitionStep;
 	current_color[2] = c1[2] + (c2[2] - c1[2]) * color_transition_step / kMaxColorTransitionStep;
-	drawScene();
+	// drawScene();
 }
 
 CameraAngle ComputeAngle(const Vector3f& pos) {
@@ -204,8 +213,8 @@ void mouseMotionFunc(int x, int y) {
     mouse_y = y;
     float theta_diff = -dx * 0.02 / PI;
     float alpha_diff = dy * 0.02 / PI;
-    RotateCamera(theta_diff, 0);
-    drawScene();
+    RotateCamera(theta_diff, alpha_diff);
+    // drawScene();
 }
 
 void mouseFunc(int button, int state, int x, int y) {
@@ -340,6 +349,7 @@ void initRendering()
     glEnable(GL_DEPTH_TEST);   // Depth testing must be turned on
     glEnable(GL_LIGHTING);     // Enable lighting calculations
     glEnable(GL_LIGHT0);       // Turn on light #0.
+    world_clock = glutGet(GLUT_ELAPSED_TIME);
 }
 
 // Called when the window is resized
@@ -454,6 +464,16 @@ void loadInput()
     }
 }
 
+void idleFunc() {
+    drawScene();
+    auto current_time = glutGet(GLUT_ELAPSED_TIME);
+    auto expected_time = world_clock + kTargetFrameTime;
+    if (current_time < expected_time) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(expected_time - current_time));
+    }
+    world_clock = current_time;
+}
+
 // Main routine.
 // Set up OpenGL, define the callbacks and start the main loop
 int main( int argc, char** argv )
@@ -495,6 +515,8 @@ int main( int argc, char** argv )
 
 	// Callback for camera rotation.
 	setUpdateCameraTimer();
+
+    glutIdleFunc(idleFunc);
 
     // Start the main loop.  glutMainLoop never returns.
     glutMainLoop( );
