@@ -6,20 +6,20 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
-#include <vecmath.h>
+#include <vecmath/vecmath.h>
 
 class Camera
 {
 public:
 
     Camera();
-    
+
     typedef enum { NONE, LEFT, MIDDLE, RIGHT } Button;
 
     // You must call all of the Set*() functions before you use this!
     // I didn't put it into the constructor because it's inconvenient
     // to initialize stuff in my opengl application.
-    
+
     void SetDimensions(int w, int h);
     void SetViewport(int x, int y, int w, int h);
     void SetPerspective(float fovy);
@@ -30,7 +30,7 @@ public:
     void MouseRelease(int x, int y);
 
     // Apply viewport, perspective, and modeling
-    // use these instead of 
+    // use these instead of
     void ApplyViewport() const;
     void ApplyPerspective() const;
     void ApplyModelview() const;
@@ -44,10 +44,10 @@ public:
     Vector3f GetCenter() const { return mCurrentCenter; }
     Matrix4f GetRotation() const { return mCurrentRot; }
     float GetDistance() const { return mCurrentDistance; }
-    
+
 private:
 
-    // States 
+    // States
     int     mDimensions[2];
     int     mStartClick[2];
     Button  mButtonState;

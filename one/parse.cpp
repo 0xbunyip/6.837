@@ -7,13 +7,13 @@ namespace {
 
     // read in dim-dimensional control points into a vector
     vector<Vector3f> readCps(istream &in, unsigned dim)
-    {    
-        // number of control points    
+    {
+        // number of control points
         unsigned n;
         in >> n;
 
         cerr << "  " << n << " cps" << endl;
-    
+
         // vector of control points
         vector<Vector3f> cps(n);
 
@@ -40,7 +40,7 @@ namespace {
                 in >> z;
                 cps[i] = Vector3f( x, y, z );
                 in >> delim;
-                break;            
+                break;
             default:
                 abort();
             }
@@ -53,7 +53,7 @@ namespace {
 
 
 bool parseFile(istream &in,
-               vector<vector<Vector3f> > &ctrlPoints, 
+               vector<vector<Vector3f> > &ctrlPoints,
                vector<Curve>             &curves,
                vector<string>            &curveNames,
                vector<Surface>           &surfaces,
@@ -63,8 +63,8 @@ bool parseFile(istream &in,
     curves.clear();
     curveNames.clear();
     surfaces.clear();
-    surfaceNames.clear();    
-    
+    surfaceNames.clear();
+
     string objType;
 
     // For looking up curve indices by name
@@ -72,22 +72,22 @@ bool parseFile(istream &in,
 
     // For looking up surface indices by name
     map<string,unsigned> surfaceIndex;
-        
+
     // For storing dimension of curve
     vector<unsigned> dims;
 
     unsigned counter = 0;
-    
-    while (in >> objType) 
+
+    while (in >> objType)
     {
         cerr << ">object " << counter++ << endl;
         string objName;
         in >> objName;
 
         bool named = (objName != ".");
-        
+
         vector<Vector3f> cpsToAdd;
-        
+
         if (curveIndex.find(objName) != curveIndex.end() ||
             surfaceIndex.find(objName) != surfaceIndex.end())
         {
@@ -105,7 +105,7 @@ bool parseFile(istream &in,
             curveNames.push_back(objName);
             dims.push_back(2);
             if (named) curveIndex[objName] = dims.size()-1;
-            
+
         }
         else if (objType == "bsp2")
         {
@@ -145,11 +145,11 @@ bool parseFile(istream &in,
             in >> profName;
 
             cerr << "  profile [" << profName << "]" << endl;
-            
+
             map<string,unsigned>::const_iterator it = curveIndex.find(profName);
 
             // Failure checks
-            if (it == curveIndex.end()) {                
+            if (it == curveIndex.end()) {
                 cerr << "failed: [" << profName << "] doesn't exist!" << endl; return false;
             }
             if (dims[it->second] != 2) {
@@ -164,7 +164,7 @@ bool parseFile(istream &in,
         else if (objType == "gcyl")
         {
             cerr << " reading gcyl " << "[" << objName << "]" << endl;
-            
+
             // Name of the profile curve and sweep curve
             string profName, sweepName;
             in >> profName >> sweepName;
@@ -175,8 +175,8 @@ bool parseFile(istream &in,
 
             // Failure checks for profile
             itP = curveIndex.find(profName);
-            
-            if (itP == curveIndex.end()) {                
+
+            if (itP == curveIndex.end()) {
                 cerr << "failed: [" << profName << "] doesn't exist!" << endl; return false;
             }
             if (dims[itP->second] != 2) {
@@ -185,7 +185,7 @@ bool parseFile(istream &in,
 
             // Failure checks for sweep
             itS = curveIndex.find(sweepName);
-            if (itS == curveIndex.end()) {                
+            if (itS == curveIndex.end()) {
                 cerr << "failed: [" << sweepName << "] doesn't exist!" << endl; return false;
             }
 

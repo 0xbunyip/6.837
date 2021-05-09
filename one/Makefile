@@ -1,12 +1,11 @@
 INCFLAGS  = -I /usr/include/GL
-INCFLAGS += -I mit-vecmath/output/vecmath
+# INCFLAGS += -I mit-vecmath/output/vecmath
 # INCFLAGS += -I /mit/6.837/public/include/vecmath
 
 LINKFLAGS = -lglut -lGL -lGLU
-LINKFLAGS += -L mit-vecmath/output -lvecmath
-# LINKFLAGS += -lvecmath
+LINKFLAGS += -lvecmath
 
-CFLAGS    = -O2# -Wall -ansi -DSOLN
+CFLAGS    = -O2 -Wall -ansi -DSOLN
 CC        = g++
 SRCS      = main.cpp parse.cpp curve.cpp surf.cpp camera.cpp
 OBJS      = $(SRCS:.cpp=.o)

@@ -2,7 +2,7 @@
 #define CURVE_H
 
 #include "tuple.h"
-#include <vecmath.h>
+#include <vecmath/vecmath.h>
 #include <vector>
 
 // The CurvePoint object stores information about a point on a curve
