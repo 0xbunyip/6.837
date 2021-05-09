@@ -16,6 +16,12 @@ namespace
         return ( lhs - rhs ).absSquared() < eps;
     }
 
+    const Matrix4f& kBernsteinMatrix = {
+        1, -3, 3, -1,
+        0, 3, -6, 3,
+        0, 0, 3, -3,
+        0, 0, 0, 1,
+    };
 
 }
 
@@ -58,13 +64,6 @@ Curve evalBezier( const vector< Vector3f >& P, unsigned steps )
     cerr << "\t>>> Returning empty curve." << endl;
 
     Curve curve;
-    Matrix4f bernsteinMat = {
-        1, -3, 3, -1,
-        0, 3, -6, 3,
-        0, 0, 3, -3,
-        0, 0, 0, 1,
-    };
-
     for (uint j = 0; j < P.size(); j += 3) {
         Matrix4f G(
             P[j].x(), P[j + 1].x(), P[j + 2].x(), P[j + 3].x(),
@@ -72,15 +71,29 @@ Curve evalBezier( const vector< Vector3f >& P, unsigned steps )
             P[j].z(), P[j + 1].z(), P[j + 2].z(), P[j + 3].z(),
             0, 0, 0, 0
         );
-        auto GB = G * bernsteinMat;
+        auto GB = G * kBernsteinMatrix;
 
         for (uint i = 0; i < steps; ++i) {
             float t = i * 1.0 / steps;
+
+            // Points on Bezier curve.
             Vector4f T(1, t, t * t, t * t * t);
             auto GBT = GB * T;
             auto V = GBT.xyz();
 
-            curve.push_back(CurvePoint{V});
+            // Tangent.
+            Vector4f Tp(0, 1, 2 * t, 3 * t * t);
+            auto GBTp = GB * Tp;
+            auto Ta = GBTp.xyz();
+            Ta.normalize();
+
+            // Normal.
+            Vector4f Tpp(0, 0, 2, 6 * t);
+            auto GBTpp = GB * Tpp;
+            auto N = GBTpp.xyz();
+            N.normalize();
+
+            curve.push_back(CurvePoint{V, Ta, N});
         }
     }
 
