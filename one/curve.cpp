@@ -16,9 +16,9 @@ namespace
         return ( lhs - rhs ).absSquared() < eps;
     }
 
-    
+
 }
-    
+
 
 Curve evalBezier( const vector< Vector3f >& P, unsigned steps )
 {
@@ -57,8 +57,35 @@ Curve evalBezier( const vector< Vector3f >& P, unsigned steps )
     cerr << "\t>>> Steps (type steps): " << steps << endl;
     cerr << "\t>>> Returning empty curve." << endl;
 
-    // Right now this will just return this empty curve.
-    return Curve();
+    Curve curve;
+    Matrix4f bernsteinMat = {
+        1, -3, 3, -1,
+        0, 3, -6, 3,
+        0, 0, 3, -3,
+        0, 0, 0, 1,
+    };
+
+    for (uint j = 0; j < P.size(); j += 3) {
+        Matrix4f G(
+            P[j].x(), P[j + 1].x(), P[j + 2].x(), P[j + 3].x(),
+            P[j].y(), P[j + 1].y(), P[j + 2].y(), P[j + 3].y(),
+            P[j].z(), P[j + 1].z(), P[j + 2].z(), P[j + 3].z(),
+            0, 0, 0, 0
+        );
+        auto GB = G * bernsteinMat;
+
+        for (uint i = 0; i < steps; ++i) {
+            float t = i * 1.0 / steps;
+            Vector4f T(1, t, t * t, t * t * t);
+            auto GBT = GB * T;
+            auto V = GBT.xyz();
+
+            curve.push_back(CurvePoint{V});
+        }
+    }
+
+    return curve;
+    // return Curve();
 }
 
 Curve evalBspline( const vector< Vector3f >& P, unsigned steps )
@@ -94,7 +121,7 @@ Curve evalCircle( float radius, unsigned steps )
 {
     // This is a sample function on how to properly initialize a Curve
     // (which is a vector< CurvePoint >).
-    
+
     // Preallocate a curve with steps+1 CurvePoints
     Curve R( steps+1 );
 
@@ -107,10 +134,10 @@ Curve evalCircle( float radius, unsigned steps )
         // Initialize position
         // We're pivoting counterclockwise around the y-axis
         R[i].V = radius * Vector3f( cos(t), sin(t), 0 );
-        
+
         // Tangent vector is first derivative
         R[i].T = Vector3f( -sin(t), cos(t), 0 );
-        
+
         // Normal vector is second derivative
         R[i].N = Vector3f( -cos(t), -sin(t), 0 );
 
@@ -127,10 +154,10 @@ void drawCurve( const Curve& curve, float framesize )
     glPushAttrib( GL_ALL_ATTRIB_BITS );
 
     // Setup for line drawing
-    glDisable( GL_LIGHTING ); 
+    glDisable( GL_LIGHTING );
     glColor4f( 1, 1, 1, 1 );
     glLineWidth( 1 );
-    
+
     // Draw curve
     glBegin( GL_LINE_STRIP );
     for( unsigned i = 0; i < curve.size(); ++i )
@@ -164,7 +191,7 @@ void drawCurve( const Curve& curve, float framesize )
             glPopMatrix();
         }
     }
-    
+
     // Pop state
     glPopAttrib();
 }
