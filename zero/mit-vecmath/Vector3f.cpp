@@ -320,3 +320,8 @@ bool operator != ( const Vector3f& v0, const Vector3f& v1 )
 {
     return !( v0 == v1 );
 }
+
+std::ostream& operator<<(std::ostream& os, const Vector3f& v) {
+    os << "< " << v.m_elements[0] << ", " << v.m_elements[1] << ", " << v.m_elements[2] << " >";
+    return os;
+}

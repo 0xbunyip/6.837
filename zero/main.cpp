@@ -5,13 +5,22 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
-#include <vecmath.h>
+#include <vecmath/vecmath.h>
 using namespace std;
+
+#define DEBUG 1
+
+#ifdef DEBUG
+#  define LOG(x) cout << "[L" << __LINE__ << "] " << #x << ": " << x << endl
+#  define LOGS(x) cout << "[L" << __LINE__ << "] " << x << endl
+#else
+#  define LOG(x)
+#  define LOGS(x)
+#endif
+
 
 // Globals
 constexpr float PI = M_PI;
-constexpr int kTargetFPS = 60;
-constexpr int kTargetFrameTime = static_cast<int>(1000.0 / kTargetFPS);
 
 // #################### Objects ####################
 class DrawableObject {
@@ -79,11 +88,15 @@ float alpha = PI / 2; // Rotating around x-axis.
 bool rotating_camera = false;
 
 // #################### Mouse ####################
+constexpr float kMouseThetaDiff = 0.03;
+constexpr float kMouseAlphaDiff = 0.01;
 int mouse_x = -1;
 int mouse_y = -1;
 
 // #################### Time ####################
 int world_clock = 0;
+constexpr int kTargetFPS = 60;
+constexpr int kTargetFrameTime = static_cast<int>(1000.0 / kTargetFPS);
 
 // You will need more global variables to implement color and position changes
 
@@ -95,17 +108,6 @@ inline void glVertex(const Vector3f &a)
 
 inline void glNormal(const Vector3f &a)
 { glNormal3fv(a); }
-
-
-// #define DEBUG 1
-
-#ifdef DEBUG
-#  define LOG(x) cout << "[L" << __LINE__ << "] " << #x << ": " << x << endl
-#  define LOGS(x) cout << "[L" << __LINE__ << "] " << x << endl
-#else
-#  define LOG(x)
-#  define LOGS(x)
-#endif
 
 
 void updateCamera(int);
@@ -181,6 +183,9 @@ void UpdateCameraUp() {
     if (Vector3f::dot(camera_up, last_camera_up) < 0) {
         camera_up = -camera_up;
     }
+    camera_up.normalize();
+    LOGS("====");
+    LOG(camera_up);
 }
 
 void RotateCamera(float theta_diff, float alpha_diff) {
@@ -208,11 +213,11 @@ void RotateCamera(float theta_diff, float alpha_diff) {
 void mouseMotionFunc(int x, int y) {
     int dx = x - mouse_x;
     int dy = y - mouse_y;
-    LOG(dx);
+    // LOG(dx);
     mouse_x = x;
     mouse_y = y;
-    float theta_diff = -dx * 0.02 / PI;
-    float alpha_diff = dy * 0.02 / PI;
+    float theta_diff = -dx * kMouseThetaDiff / PI;
+    float alpha_diff = dy * kMouseAlphaDiff / PI;
     RotateCamera(theta_diff, alpha_diff);
     // drawScene();
 }

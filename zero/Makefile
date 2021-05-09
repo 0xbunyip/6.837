@@ -1,8 +1,8 @@
 INCFLAGS  = -I /usr/include/GL
-INCFLAGS += -I /usr/include/vecmath
+INCFLAGS += -I mit-vecmath/output/vecmath
 
-LINKFLAGS  = -lglut -lGL -lGLU
-LINKFLAGS += -L /mit/6.837/public/lib -lvecmath
+LINKFLAGS  = -lglut -lGL -lGLU #-Wl,--trace
+LINKFLAGS += -L mit-vecmath/output -lvecmath
 
 CFLAGS    = -O2
 CC        = g++
