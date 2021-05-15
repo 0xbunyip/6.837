@@ -24,6 +24,14 @@ namespace
         0, 0, 0, 1,
     };
 
+    const Matrix4f& kBSplineMatrix = {
+        1 / 6.0, -3 / 6.0, 3 / 6.0, -1 / 6.0,
+        4 / 6.0, 0 / 6.0, -6 / 6.0, 3 / 6.0,
+        1 / 6.0, 3 / 6.0, 3 / 6.0, -3 / 6.0,
+        0 / 6.0, 0 / 6.0, 0 / 6.0, 1 / 6.0,
+    };
+
+    const Matrix4f& kBezierToBspline = kBSplineMatrix * kBernsteinMatrix.inverse();
 }
 
 
@@ -90,12 +98,6 @@ Curve evalBezier( const vector< Vector3f >& P, unsigned steps )
             auto Ta = GBTp.xyz();
             Ta.normalize();
 
-            // // Normal.
-            // Vector4f Tpp(0, 0, 2, 6 * t);
-            // auto GBTpp = GB * Tpp;
-            // auto N = GBTpp.xyz();
-            // N.normalize();
-
             if (i == 0 && abs(Vector3f::dot(Ta, Bi)) - 1.0 < 1e-6) {
                 Bi = Vector3f(2.0, 2.0, 1.0);
                 Bi.normalize();
@@ -141,8 +143,19 @@ Curve evalBspline( const vector< Vector3f >& P, unsigned steps )
     cerr << "\t>>> Steps (type steps): " << steps << endl;
     cerr << "\t>>> Returning empty curve." << endl;
 
+    // Transform control points.
+    vector<Vector3f> P2;
+    for (const auto& p : P) {
+        Vector4f p0 = Vector4f(p, 0.0);
+        P2.push_back(Vector3f(Vector4f::dot(p0, kBezierToBspline.getRow(0)),
+                              Vector4f::dot(p0, kBezierToBspline.getRow(1)),
+                              Vector4f::dot(p0, kBezierToBspline.getRow(2))));
+    }
+
+    auto curve = evalBezier(P2, steps);
+
     // Return an empty curve right now.
-    return Curve();
+    return curve;
 }
 
 Curve evalCircle( float radius, unsigned steps )
