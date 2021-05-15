@@ -5,7 +5,7 @@ INCFLAGS  = -I /usr/include/GL
 LINKFLAGS = -lglut -lGL -lGLU
 LINKFLAGS += -lvecmath
 
-CFLAGS    = -O2 -Wall -DSOLN
+CFLAGS    = -O2 -Wall -DSOLN -std=c++17
 CC        = g++
 SRCS      = main.cpp parse.cpp curve.cpp surf.cpp camera.cpp
 OBJS      = $(SRCS:.cpp=.o)

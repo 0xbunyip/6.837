@@ -1,5 +1,6 @@
 #include "curve.h"
 #include "extra.h"
+#include "debug.h"
 #ifdef WIN32
 #include <windows.h>
 #endif
@@ -64,7 +65,7 @@ Curve evalBezier( const vector< Vector3f >& P, unsigned steps )
     cerr << "\t>>> Returning empty curve." << endl;
 
     Curve curve;
-    for (uint j = 0; j < P.size(); j += 3) {
+    for (uint j = 0; j < P.size() - 1; j += 3) {
         Matrix4f G(
             P[j].x(), P[j + 1].x(), P[j + 2].x(), P[j + 3].x(),
             P[j].y(), P[j + 1].y(), P[j + 2].y(), P[j + 3].y(),
@@ -73,6 +74,8 @@ Curve evalBezier( const vector< Vector3f >& P, unsigned steps )
         );
         auto GB = G * kBernsteinMatrix;
 
+        Vector3f Bi(1.0, 1.0, 1.0); // Binormal vector.
+        Bi.normalize();
         for (uint i = 0; i < steps; ++i) {
             float t = i * 1.0 / steps;
 
@@ -87,12 +90,24 @@ Curve evalBezier( const vector< Vector3f >& P, unsigned steps )
             auto Ta = GBTp.xyz();
             Ta.normalize();
 
-            // Normal.
-            Vector4f Tpp(0, 0, 2, 6 * t);
-            auto GBTpp = GB * Tpp;
-            auto N = GBTpp.xyz();
-            N.normalize();
+            // // Normal.
+            // Vector4f Tpp(0, 0, 2, 6 * t);
+            // auto GBTpp = GB * Tpp;
+            // auto N = GBTpp.xyz();
+            // N.normalize();
 
+            if (i == 0 && abs(Vector3f::dot(Ta, Bi)) - 1.0 < 1e-6) {
+                Bi = Vector3f(2.0, 2.0, 1.0);
+                Bi.normalize();
+            }
+
+            // Normal.
+            auto N = Vector3f::cross(Bi, Ta);
+            N.normalize();
+            Bi = Vector3f::cross(Ta, N);
+            Bi.normalize();
+
+            LOG(i, V);
             curve.push_back(CurvePoint{V, Ta, N});
         }
     }
