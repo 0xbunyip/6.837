@@ -70,10 +70,10 @@ Curve evalBezier( const vector< Vector3f >& P, unsigned steps )
     }
 
     cerr << "\t>>> Steps (type steps): " << steps << endl;
-    cerr << "\t>>> Returning empty curve." << endl;
+    // cerr << "\t>>> Returning empty curve." << endl;
 
     Curve curve;
-    for (uint j = 0; j < P.size() - 1; j += 3) {
+    for (uint j = 0; j + 3 < P.size(); j += 4) {
         Matrix4f G(
             P[j].x(), P[j + 1].x(), P[j + 2].x(), P[j + 3].x(),
             P[j].y(), P[j + 1].y(), P[j + 2].y(), P[j + 3].y(),
@@ -84,7 +84,7 @@ Curve evalBezier( const vector< Vector3f >& P, unsigned steps )
 
         Vector3f Bi(1.0, 1.0, 1.0); // Binormal vector.
         Bi.normalize();
-        for (uint i = 0; i < steps; ++i) {
+        for (uint i = 0; i <= steps; ++i) {
             float t = i * 1.0 / steps;
 
             // Points on Bezier curve.
@@ -109,7 +109,7 @@ Curve evalBezier( const vector< Vector3f >& P, unsigned steps )
             Bi = Vector3f::cross(Ta, N);
             Bi.normalize();
 
-            LOG(i, V);
+            // LOG(i, V);
             curve.push_back(CurvePoint{V, Ta, N});
         }
     }
@@ -141,11 +141,11 @@ Curve evalBspline( const vector< Vector3f >& P, unsigned steps )
     }
 
     cerr << "\t>>> Steps (type steps): " << steps << endl;
-    cerr << "\t>>> Returning empty curve." << endl;
+    // cerr << "\t>>> Returning empty curve." << endl;
 
     // Transform control points.
-    vector<Vector3f> P2(P.size());
-    for (uint j = 0; j < P.size() - 1; j += 3) {
+    vector<Vector3f> P2;
+    for (uint j = 0; j + 3 < P.size(); j += 1) {
         Matrix4f G(
             P[j].x(), P[j + 1].x(), P[j + 2].x(), P[j + 3].x(),
             P[j].y(), P[j + 1].y(), P[j + 2].y(), P[j + 3].y(),
@@ -153,10 +153,12 @@ Curve evalBspline( const vector< Vector3f >& P, unsigned steps )
             0, 0, 0, 0
         );
         auto G2 = G * kBezierToBspline;
-        P2[j] = G2.getCol(0).xyz();
-        P2[j + 1] = G2.getCol(1).xyz();
-        P2[j + 2] = G2.getCol(2).xyz();
-        P2[j + 3] = G2.getCol(3).xyz();
+        P2.push_back(G2.getCol(0).xyz());
+        P2.push_back(G2.getCol(1).xyz());
+        P2.push_back(G2.getCol(2).xyz());
+        P2.push_back(G2.getCol(3).xyz());
+        // int n = P2.size() - 1;
+        // LOG(n, P2[n - 3], P2[n - 2], P2[n - 1], P2[n]);
     }
 
     auto curve = evalBezier(P2, steps);
