@@ -144,12 +144,19 @@ Curve evalBspline( const vector< Vector3f >& P, unsigned steps )
     cerr << "\t>>> Returning empty curve." << endl;
 
     // Transform control points.
-    vector<Vector3f> P2;
-    for (const auto& p : P) {
-        Vector4f p0 = Vector4f(p, 0.0);
-        P2.push_back(Vector3f(Vector4f::dot(p0, kBezierToBspline.getRow(0)),
-                              Vector4f::dot(p0, kBezierToBspline.getRow(1)),
-                              Vector4f::dot(p0, kBezierToBspline.getRow(2))));
+    vector<Vector3f> P2(P.size());
+    for (uint j = 0; j < P.size() - 1; j += 3) {
+        Matrix4f G(
+            P[j].x(), P[j + 1].x(), P[j + 2].x(), P[j + 3].x(),
+            P[j].y(), P[j + 1].y(), P[j + 2].y(), P[j + 3].y(),
+            P[j].z(), P[j + 1].z(), P[j + 2].z(), P[j + 3].z(),
+            0, 0, 0, 0
+        );
+        auto G2 = G * kBezierToBspline;
+        P2[j] = G2.getCol(0).xyz();
+        P2[j + 1] = G2.getCol(1).xyz();
+        P2[j + 2] = G2.getCol(2).xyz();
+        P2[j + 3] = G2.getCol(3).xyz();
     }
 
     auto curve = evalBezier(P2, steps);
