@@ -20,6 +20,27 @@ namespace
     }
 }
 
+void extendSurface(Surface& surface, const Curve& profile,
+                   const Vector4f& N, const Vector4f& B,
+                   const Vector4f& T, const Vector4f& V) {
+    Matrix4f R(N, B, T, V, true);
+    for (int j = 0; j < profile.size(); ++j) {
+        auto v = R * Vector4f(profile[j].V, 1);
+        auto n = -(R * Vector4f(profile[j].N, 0));
+        surface.VV.push_back(v.xyz());
+        surface.VN.push_back(n.xyz().normalized());
+
+        int D = surface.VV.size() - 1;
+        int C = D - 1;
+        int B = D - profile.size();
+        int A = B - 1;
+        if (A < 0) continue;
+
+        surface.VF.push_back(Tup3u(A, D, B));
+        surface.VF.push_back(Tup3u(A, C, D));
+    }
+}
+
 Surface makeSurfRev(const Curve &profile, unsigned steps)
 {
     Surface surface;
@@ -32,31 +53,15 @@ Surface makeSurfRev(const Curve &profile, unsigned steps)
         exit(0);
     }
 
-    // TODO: Here you should build the surface.  See surf.h for details.
     LOG(steps);
-    int N = profile.size();
     for (int i = 0; i <= steps; ++i) {
         float theta = -i * 2 * M_PI / steps;
-        Matrix3f R(
-            cos(theta), 0, sin(theta),
-            0, 1, 0,
-            -sin(theta), 0, cos(theta)
 
-        );
-        for (int j = 0; j < N; ++j) {
-            surface.VV.push_back(R * profile[j].V);
-            surface.VN.push_back(-(R * profile[j].N));
-            // LOG(surface.VV.back());
-
-            if (i == 0 || j == 0) continue;
-
-            int D = i * N + j;
-            int C = D - 1;
-            int B = D - N;
-            int A = B - 1;
-            surface.VF.push_back(Tup3u(A, D, B));
-            surface.VF.push_back(Tup3u(A, C, D));
-        }
+        Vector4f N(cos(theta), 0, -sin(theta), 0);
+        Vector4f B(0, 1, 0, 0);
+        Vector4f T(sin(theta), 0, cos(theta), 0);
+        Vector4f V(0, 0, 0, 1);
+        extendSurface(surface, profile, N, B, T, V);
     }
 
     // cerr << "\t>>> makeSurfRev called (but not implemented).\n\t>>> Returning empty surface." << endl;
@@ -74,9 +79,19 @@ Surface makeGenCyl(const Curve &profile, const Curve &sweep )
         exit(0);
     }
 
-    // TODO: Here you should build the surface.  See surf.h for details.
+    LOG(sweep.size());
+    for (int i = 0; i < sweep.size(); i += 1) {
+        extendSurface(surface, profile,
+                      Vector4f(sweep[i].B, 0),
+                      Vector4f(sweep[i].N, 0),
+                      Vector4f(sweep[i].T, 0),
+                      Vector4f(sweep[i].V, 1));
 
-    cerr << "\t>>> makeGenCyl called (but not implemented).\n\t>>> Returning empty surface." <<endl;
+        // LOG(sweep[0].V, sweep[0].N);
+        // LOG(surface.VV[0], surface.VN[0]);
+    }
+
+    // cerr << "\t>>> makeGenCyl called (but not implemented).\n\t>>> Returning empty surface." <<endl;
 
     return surface;
 }
