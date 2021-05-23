@@ -34,19 +34,28 @@ Surface makeSurfRev(const Curve &profile, unsigned steps)
 
     // TODO: Here you should build the surface.  See surf.h for details.
     LOG(steps);
-    for (int i = 0; i < steps; ++i) {
-        float theta = i * M_PI / steps;
+    int N = profile.size();
+    for (int i = 0; i <= steps; ++i) {
+        float theta = -i * 2 * M_PI / steps;
         Matrix3f R(
             cos(theta), 0, sin(theta),
             0, 1, 0,
             -sin(theta), 0, cos(theta)
 
         );
-        for (int j = 0; j < profile.size(); ++j) {
+        for (int j = 0; j < N; ++j) {
             surface.VV.push_back(R * profile[j].V);
-            surface.VN.push_back(R * profile[j].V);
-            surface.VF.push_back(Tup3u(0, 0, 0));
+            surface.VN.push_back(-(R * profile[j].N));
             // LOG(surface.VV.back());
+
+            if (i == 0 || j == 0) continue;
+
+            int D = i * N + j;
+            int C = D - 1;
+            int B = D - N;
+            int A = B - 1;
+            surface.VF.push_back(Tup3u(A, D, B));
+            surface.VF.push_back(Tup3u(A, C, D));
         }
     }
 
