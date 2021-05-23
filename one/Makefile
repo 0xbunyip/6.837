@@ -7,7 +7,7 @@ LINKFLAGS += -lvecmath
 
 CFLAGS    = -O2 -Wall -DSOLN -std=c++17
 CC        = g++
-SRCS      = main.cpp parse.cpp curve.cpp surf.cpp camera.cpp
+SRCS      = main.cpp parse.cpp curve.cpp surf.cpp camera.cpp util.cpp
 OBJS      = $(SRCS:.cpp=.o)
 PROG      = a1
 

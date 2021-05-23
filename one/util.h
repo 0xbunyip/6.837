@@ -1,5 +1,9 @@
-#ifndef _DEBUG_H
-#define _DEBUG_H
+#ifndef _UTIL_H
+#define _UTIL_H
+
+#include <iostream>
+#include <cstring>
+
 #define DEBUG 1
 
 #ifdef DEBUG
@@ -7,6 +11,7 @@
 #  define LOGS(...) shows(__LINE__, __VA_ARGS__)
 #else
 #  define LOG(...)
+#  define LOGS(...)
 #endif
 
 template<typename H1>
@@ -30,10 +35,9 @@ std::ostream& show(const int line, const char* label, T&&... rest) {
     return show(std::cout, label, rest...);
 }
 
-std::ostream& shows(const int line, const std::string&& s) {
-    return std::cout << "[L" << line << "] " << s << std::endl;
-}
+std::ostream& shows(const int line, const std::string&& s);
 
+bool equals(float a, float b, float eps = 1e-6);
 
 #endif
 

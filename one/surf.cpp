@@ -1,10 +1,11 @@
 #include "surf.h"
 #include "extra.h"
+#include "util.h"
 using namespace std;
 
 namespace
 {
-    
+
     // We're only implenting swept surfaces where the profile curve is
     // flat on the xy-plane.  This is a check function.
     static bool checkFlat(const Curve &profile)
@@ -14,7 +15,7 @@ namespace
                 profile[i].T[2] != 0.0 ||
                 profile[i].N[2] != 0.0)
                 return false;
-    
+
         return true;
     }
 }
@@ -22,17 +23,35 @@ namespace
 Surface makeSurfRev(const Curve &profile, unsigned steps)
 {
     Surface surface;
-    
+
     if (!checkFlat(profile))
     {
         cerr << "surfRev profile curve must be flat on xy plane." << endl;
+        for (unsigned i=0; i<profile.size(); i++)
+            LOG(i, profile[i].V, profile[i].T, profile[i].N);
         exit(0);
     }
 
     // TODO: Here you should build the surface.  See surf.h for details.
+    LOG(steps);
+    for (int i = 0; i < steps; ++i) {
+        float theta = i * M_PI / steps;
+        Matrix3f R(
+            cos(theta), 0, sin(theta),
+            0, 1, 0,
+            -sin(theta), 0, cos(theta)
 
-    cerr << "\t>>> makeSurfRev called (but not implemented).\n\t>>> Returning empty surface." << endl;
- 
+        );
+        for (int j = 0; j < profile.size(); ++j) {
+            surface.VV.push_back(R * profile[j].V);
+            surface.VN.push_back(R * profile[j].V);
+            surface.VF.push_back(Tup3u(0, 0, 0));
+            // LOG(surface.VV.back());
+        }
+    }
+
+    // cerr << "\t>>> makeSurfRev called (but not implemented).\n\t>>> Returning empty surface." << endl;
+
     return surface;
 }
 
@@ -72,10 +91,10 @@ void drawSurface(const Surface &surface, bool shaded)
         glCullFace(GL_BACK);
     }
     else
-    {        
+    {
         glDisable(GL_LIGHTING);
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        
+
         glColor4f(0.4f,0.4f,0.4f,1.f);
         glLineWidth(1);
     }
@@ -117,7 +136,7 @@ void drawNormals(const Surface &surface, float len)
 
 void outputObjFile(ostream &out, const Surface &surface)
 {
-    
+
     for (unsigned i=0; i<surface.VV.size(); i++)
         out << "v  "
             << surface.VV[i][0] << " "
@@ -131,7 +150,7 @@ void outputObjFile(ostream &out, const Surface &surface)
             << surface.VN[i][2] << endl;
 
     out << "vt  0 0 0" << endl;
-    
+
     for (unsigned i=0; i<surface.VF.size(); i++)
     {
         out << "f  ";
