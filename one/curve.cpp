@@ -73,7 +73,7 @@ Curve evalBezier( const vector< Vector3f >& P, unsigned steps )
     // cerr << "\t>>> Returning empty curve." << endl;
 
     Curve curve;
-    for (uint j = 0; j + 3 < P.size(); j += 4) {
+    for (uint j = 0; j + 3 < P.size(); j += 3) {
         Matrix4f G(
             P[j].x(), P[j + 1].x(), P[j + 2].x(), P[j + 3].x(),
             P[j].y(), P[j + 1].y(), P[j + 2].y(), P[j + 3].y(),
@@ -153,7 +153,9 @@ Curve evalBspline( const vector< Vector3f >& P, unsigned steps )
             0, 0, 0, 0
         );
         auto G2 = G * kBezierToBspline;
-        P2.push_back(G2.getCol(0).xyz());
+        if (j == 0) {
+            P2.push_back(G2.getCol(0).xyz());
+        }
         P2.push_back(G2.getCol(1).xyz());
         P2.push_back(G2.getCol(2).xyz());
         P2.push_back(G2.getCol(3).xyz());
