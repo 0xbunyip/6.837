@@ -82,8 +82,8 @@ Surface makeGenCyl(const Curve &profile, const Curve &sweep )
     LOG(sweep.size());
     for (int i = 0; i < sweep.size(); i += 1) {
         extendSurface(surface, profile,
-                      Vector4f(sweep[i].B, 0),
-                      Vector4f(sweep[i].N, 0),
+                      Vector4f(-sweep[i].B, 0),
+                      Vector4f(-sweep[i].N, 0),
                       Vector4f(sweep[i].T, 0),
                       Vector4f(sweep[i].V, 1));
 

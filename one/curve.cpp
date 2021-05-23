@@ -110,7 +110,7 @@ Curve evalBezier( const vector< Vector3f >& P, unsigned steps )
             Bi.normalize();
 
             // LOG(i, Bi, V, Ta, N);
-            curve.push_back(CurvePoint{V, Ta, N});
+            curve.push_back(CurvePoint{V, Ta, N, Bi});
         }
     }
 
