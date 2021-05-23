@@ -114,6 +114,15 @@ Curve evalBezier( const vector< Vector3f >& P, unsigned steps )
         }
     }
 
+    int n = curve.size() - 1;
+    if ((curve[0].V.x(), curve[n].V.x()) &&
+        (curve[0].V.y(), curve[n].V.y()) &&
+        (curve[0].V.z(), curve[n].V.z())) {
+        curve[n].T = curve[0].T;
+        curve[n].N = curve[0].N;
+        curve[n].B = curve[0].B;
+    }
+
     return curve;
     // return Curve();
 }
