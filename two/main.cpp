@@ -13,7 +13,7 @@
 #else
 #include <GL/glut.h>
 #endif
-#include <vecmath.h>
+#include <vecmath/vecmath.h>
 
 #include "modelerapp.h"
 #include "ModelerView.h"

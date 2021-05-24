@@ -22,7 +22,7 @@
 #include <map>
 #include <vector>
 #include <sstream>
-#include <vecmath.h>
+#include <vecmath/vecmath.h>
 
 #include "tuple.h"
 #include "Joint.h"

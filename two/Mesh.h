@@ -2,7 +2,7 @@
 #define MESH_H
 
 #include <vector>
-#include <vecmath.h>
+#include <vecmath/vecmath.h>
 #include <cstdlib>
 #include <iostream>
 #include <fstream>

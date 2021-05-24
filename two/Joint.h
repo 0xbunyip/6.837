@@ -2,7 +2,7 @@
 #define JOINT_H
 
 #include <vector>
-#include <vecmath.h>
+#include <vecmath/vecmath.h>
 
 struct Joint
 {
