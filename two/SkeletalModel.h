@@ -72,15 +72,16 @@ public:
 	void updateMesh();
 
 private:
+  void visitAndDraw(const Joint *joint);
 
-	// pointer to the root joint
-	Joint* m_rootJoint;
-	// the list of joints.
-	std::vector< Joint* > m_joints;
+  // pointer to the root joint
+  Joint *m_rootJoint;
+  // the list of joints.
+  std::vector<Joint *> m_joints;
 
-	Mesh m_mesh;
+  Mesh m_mesh;
 
-	MatrixStack m_matrixStack;
+  MatrixStack m_matrixStack;
 };
 
 #endif

@@ -39,22 +39,53 @@ void SkeletalModel::draw(Matrix4f cameraMatrix, bool skeletonVisible)
 	}
 }
 
-void SkeletalModel::loadSkeleton( const char* filename )
-{
-	// Load the skeleton from file here.
+void SkeletalModel::loadSkeleton(const char *filename) {
+  // Load the skeleton from file here.
+  ifstream in(filename);
+  if (!in) {
+    cerr << filename << " not found\a" << endl;
+    exit(0);
+  }
+
+  float x, y, z;
+  int par = 0;
+  while (in >> x >> y >> z >> par) {
+    Joint* joint = new Joint;
+    m_joints.push_back(joint);
+
+    joint->transform = Matrix4f::identity();
+    joint->transform.setCol(3, Vector4f(x, y, z, 1));
+
+    if (par == -1) {
+      m_rootJoint = joint;
+    } else {
+      m_joints[par]->children.push_back(joint);
+    }
+  }
 }
 
-void SkeletalModel::drawJoints( )
-{
-	// Draw a sphere at each joint. You will need to add a recursive helper function to traverse the joint hierarchy.
-	//
-	// We recommend using glutSolidSphere( 0.025f, 12, 12 )
-	// to draw a sphere of reasonable size.
-	//
-	// You are *not* permitted to use the OpenGL matrix stack commands
-	// (glPushMatrix, glPopMatrix, glMultMatrix).
-	// You should use your MatrixStack class
-	// and use glLoadMatrix() before your drawing call.
+void SkeletalModel::visitAndDraw(const Joint* joint) {
+  m_matrixStack.push(joint->transform);
+  glutSolidSphere(0.025f, 12, 12);
+
+  for (const auto& child : joint->children) {
+    visitAndDraw(child);
+  }
+  m_matrixStack.pop();
+}
+
+void SkeletalModel::drawJoints() {
+  // Draw a sphere at each joint. You will need to add a recursive helper
+  // function to traverse the joint hierarchy.
+  //
+  // We recommend using glutSolidSphere( 0.025f, 12, 12 )
+  // to draw a sphere of reasonable size.
+  //
+  // You are *not* permitted to use the OpenGL matrix stack commands
+  // (glPushMatrix, glPopMatrix, glMultMatrix).
+  // You should use your MatrixStack class
+  // and use glLoadMatrix() before your drawing call.
+  visitAndDraw(m_rootJoint);
 }
 
 void SkeletalModel::drawSkeleton( )
