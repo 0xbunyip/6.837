@@ -28,7 +28,7 @@ Matrix4f::Matrix4f( float m00, float m01, float m02, float m03,
 	m_elements[ 1 ] = m10;
 	m_elements[ 2 ] = m20;
 	m_elements[ 3 ] = m30;
-	
+
 	m_elements[ 4 ] = m01;
 	m_elements[ 5 ] = m11;
 	m_elements[ 6 ] = m21;
@@ -245,17 +245,17 @@ Matrix4f Matrix4f::inverse( bool* pbIsSingular, float epsilon ) const
     float cofactor01 = -Matrix3f::determinant3x3( m12, m13, m10, m22, m23, m20, m32, m33, m30 );
     float cofactor02 =  Matrix3f::determinant3x3( m13, m10, m11, m23, m20, m21, m33, m30, m31 );
     float cofactor03 = -Matrix3f::determinant3x3( m10, m11, m12, m20, m21, m22, m30, m31, m32 );
-    
+
     float cofactor10 = -Matrix3f::determinant3x3( m21, m22, m23, m31, m32, m33, m01, m02, m03 );
     float cofactor11 =  Matrix3f::determinant3x3( m22, m23, m20, m32, m33, m30, m02, m03, m00 );
     float cofactor12 = -Matrix3f::determinant3x3( m23, m20, m21, m33, m30, m31, m03, m00, m01 );
     float cofactor13 =  Matrix3f::determinant3x3( m20, m21, m22, m30, m31, m32, m00, m01, m02 );
-    
+
     float cofactor20 =  Matrix3f::determinant3x3( m31, m32, m33, m01, m02, m03, m11, m12, m13 );
     float cofactor21 = -Matrix3f::determinant3x3( m32, m33, m30, m02, m03, m00, m12, m13, m10 );
     float cofactor22 =  Matrix3f::determinant3x3( m33, m30, m31, m03, m00, m01, m13, m10, m11 );
     float cofactor23 = -Matrix3f::determinant3x3( m30, m31, m32, m00, m01, m02, m10, m11, m12 );
-    
+
     float cofactor30 = -Matrix3f::determinant3x3( m01, m02, m03, m11, m12, m13, m21, m22, m23 );
     float cofactor31 =  Matrix3f::determinant3x3( m02, m03, m00, m12, m13, m10, m22, m23, m20 );
     float cofactor32 = -Matrix3f::determinant3x3( m03, m00, m01, m13, m10, m11, m23, m20, m21 );
@@ -356,7 +356,7 @@ Matrix4f Matrix4f::ones()
 Matrix4f Matrix4f::identity()
 {
 	Matrix4f m;
-	
+
 	m( 0, 0 ) = 1;
 	m( 1, 1 ) = 1;
 	m( 2, 2 ) = 1;
@@ -438,7 +438,7 @@ Matrix4f Matrix4f::rotateZ( float radians )
 Matrix4f Matrix4f::rotation( const Vector3f& rDirection, float radians )
 {
 	Vector3f normalizedDirection = rDirection.normalized();
-	
+
 	float cosTheta = cos( radians );
 	float sinTheta = sin( radians );
 
@@ -656,8 +656,8 @@ Matrix4f Matrix4f::infinitePerspectiveProjection( float fLeft, float fRight,
 	if( directX )
 	{
 		projection( 2, 2 ) = -1.0f;
-		projection( 2, 3 ) = -fZNear;		
-	}
+                projection(2, 3) = -fZNear;
+        }
 	else
 	{
 		projection( 2, 2 ) = -1.0f;
@@ -702,4 +702,17 @@ Matrix4f operator * ( const Matrix4f& x, const Matrix4f& y )
 	}
 
 	return product;
+}
+
+std::ostream& operator<<(std::ostream& os, const Matrix4f& m) {
+  char s[256] = {0};
+  sprintf(s,
+          "\n[ %.4f %.4f %.4f %.4f ]\n[ %.4f %.4f %.4f %.4f ]\n[ %.4f %.4f "
+          "%.4f %.4f ]\n[ %.4f %.4f %.4f %.4f ]\n",
+          m.m_elements[0], m.m_elements[4], m.m_elements[8], m.m_elements[12],
+          m.m_elements[1], m.m_elements[5], m.m_elements[9], m.m_elements[13],
+          m.m_elements[2], m.m_elements[6], m.m_elements[10], m.m_elements[14],
+          m.m_elements[3], m.m_elements[7], m.m_elements[11], m.m_elements[15]);
+  os << s;
+  return os;
 }

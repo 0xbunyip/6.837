@@ -2,6 +2,7 @@
 #define MATRIX4F_H
 
 #include <cstdio>
+#include <iostream>
 
 class Matrix2f;
 class Matrix3f;
@@ -20,11 +21,11 @@ public:
 		float m10, float m11, float m12, float m13,
 		float m20, float m21, float m22, float m23,
 		float m30, float m31, float m32, float m33 );
-	
+
 	// setColumns = true ==> sets the columns of the matrix to be [v0 v1 v2 v3]
 	// otherwise, sets the rows
 	Matrix4f( const Vector4f& v0, const Vector4f& v1, const Vector4f& v2, const Vector4f& v3, bool setColumns = true );
-	
+
 	Matrix4f( const Matrix4f& rm ); // copy constructor
 	Matrix4f& operator = ( const Matrix4f& rm ); // assignment operator
 	Matrix4f& operator/=(float d);
@@ -65,8 +66,8 @@ public:
 	// ---- Utility ----
 	operator float* (); // automatic type conversion for GL
 	operator const float* () const; // automatic type conversion for GL
-	
-	void print();
+
+        void print();
 
 	static Matrix4f ones();
 	static Matrix4f identity();
@@ -92,6 +93,8 @@ public:
 	// returns an orthogonal matrix that's a uniformly distributed rotation
 	// given u[i] is a uniformly distributed random number in [0,1]
 	static Matrix4f randomRotation( float u0, float u1, float u2 );
+
+  friend std::ostream& operator<<(std::ostream& os, const Matrix4f& m);
 
 private:
 
