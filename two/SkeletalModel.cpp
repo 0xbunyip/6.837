@@ -48,6 +48,22 @@ void SkeletalModel::loadSkeleton(const char *filename) {
     exit(0);
   }
 
+  // Joint* j1 = new Joint;
+  // j1->transform = Matrix4f::translation(Vector3f(0, 0, 0));
+  // m_joints.push_back(j1);
+  // m_rootJoint = j1;
+
+  // Joint *j2 = new Joint;
+  // j2->transform = Matrix4f::translation(Vector3f(1, 0, 0));
+  // m_joints.push_back(j2);
+  // m_joints[0]->children.push_back(j2);
+
+  // Joint *j3 = new Joint;
+  // j3->transform = Matrix4f::translation(Vector3f(0, 1, 0));
+  // m_joints.push_back(j3);
+  // m_joints[0]->children.push_back(j3);
+  // return;
+
   float x, y, z;
   int par = 0;
   while (in >> x >> y >> z >> par) {
@@ -95,14 +111,27 @@ void SkeletalModel::visitAndDrawBone(const Joint *joint, const Joint* par) {
 
     const auto eye = joint->transform.getCol(3).xyz();
     const float l = eye.abs();
-    const auto scale = Matrix4f::scaling(0.025 / 0.5, 0.025 / 0.5, l);
+    const auto scale = Matrix4f::scaling(0.010 / 0.5, 0.010 / 0.5, l);
 
-    const auto center = Vector3f::ZERO;
-    const auto z = (eye - center).normalized();
-    const auto up = Vector3f::cross(z, Vector3f(0, 0, 1)).normalized();
-    const auto look = Matrix4f::lookAt(eye, center, up);
+    const auto origin = par->transform.getCol(3).xyz();
+    const auto b3 = eye.normalized(); // z
+    const auto b2 = Vector3f::cross(b3, Vector3f(0, 0, 1)).normalized(); // y
+    const auto b1 = Vector3f::cross(b2, b3).normalized(); // x
 
-    const auto mat = look * scale * translate;
+    const Matrix4f transform = Matrix4f(
+        Vector3f::dot(b1, Vector3f::RIGHT), Vector3f::dot(b2, Vector3f::RIGHT),
+        Vector3f::dot(b3, Vector3f::RIGHT), 0, Vector3f::dot(b1, Vector3f::UP),
+        Vector3f::dot(b2, Vector3f::UP), Vector3f::dot(b3, Vector3f::UP), 0,
+        Vector3f::dot(b1, -Vector3f::FORWARD),
+        Vector3f::dot(b2, -Vector3f::FORWARD),
+        Vector3f::dot(b3, -Vector3f::FORWARD), 0, origin.x(), origin.y(),
+        origin.z(), 1);
+
+    const auto mat = transform * scale * translate;
+    // LOG(eye, l, z, up);
+    LOG(b1, b2, b3);
+    LOG(transform);
+    // LOG(mat);
 
     m_matrixStack.push(mat);
     glutSolidCube(1.0);

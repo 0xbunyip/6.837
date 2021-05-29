@@ -705,14 +705,12 @@ Matrix4f operator * ( const Matrix4f& x, const Matrix4f& y )
 }
 
 std::ostream& operator<<(std::ostream& os, const Matrix4f& m) {
-  char s[256] = {0};
-  sprintf(s,
-          "\n[ %.4f %.4f %.4f %.4f ]\n[ %.4f %.4f %.4f %.4f ]\n[ %.4f %.4f "
-          "%.4f %.4f ]\n[ %.4f %.4f %.4f %.4f ]\n",
-          m.m_elements[0], m.m_elements[4], m.m_elements[8], m.m_elements[12],
-          m.m_elements[1], m.m_elements[5], m.m_elements[9], m.m_elements[13],
-          m.m_elements[2], m.m_elements[6], m.m_elements[10], m.m_elements[14],
-          m.m_elements[3], m.m_elements[7], m.m_elements[11], m.m_elements[15]);
-  os << s;
+  os << "\n[" << m.m_elements[0] << " " << m.m_elements[4] << " "
+     << m.m_elements[8] << " " << m.m_elements[12] << "]\n[" << m.m_elements[1]
+     << " " << m.m_elements[5] << " " << m.m_elements[9] << " "
+     << m.m_elements[13] << "]\n[" << m.m_elements[2] << " " << m.m_elements[6]
+     << " " << m.m_elements[10] << " " << m.m_elements[14] << "]\n["
+     << m.m_elements[3] << " " << m.m_elements[7] << " " << m.m_elements[11]
+     << " " << m.m_elements[15] << "]\n";
   return os;
 }
