@@ -72,7 +72,8 @@ public:
 	void updateMesh();
 
 private:
-  void visitAndDraw(const Joint *joint);
+  void visitAndDrawJoint(const Joint *joint);
+  void visitAndDrawBone(const Joint *joint, const Joint *par = nullptr);
 
   // pointer to the root joint
   Joint *m_rootJoint;

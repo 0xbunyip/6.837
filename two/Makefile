@@ -16,7 +16,7 @@ LINKFLAGS += -lfltk -lfltk_gl -lX11 -ldl -lXext -lfontconfig -lXft -lXrender
 CFLAGS    = -g -Wall -std=c++17
 CFLAGS    += -DSOLN
 CC        = g++
-SRCS      = bitmap.cpp camera.cpp MatrixStack.cpp modelerapp.cpp modelerui.cpp ModelerView.cpp Joint.cpp SkeletalModel.cpp Mesh.cpp main.cpp
+SRCS      = bitmap.cpp camera.cpp MatrixStack.cpp modelerapp.cpp modelerui.cpp ModelerView.cpp Joint.cpp SkeletalModel.cpp Mesh.cpp main.cpp util.cpp
 OBJS      = $(SRCS:.cpp=.o)
 PROG      = a2
 
@@ -42,4 +42,5 @@ modelerapp.o: modelerapp.h ModelerView.h modelerui.h bitmap.h camera.h
 modelerui.o: modelerui.h ModelerView.h bitmap.h camera.h modelerapp.h
 ModelerView.o: ModelerView.h camera.h
 SkeletalModel.o: MatrixStack.h ModelerView.h Joint.h modelerapp.h
+util.o: util.h
 

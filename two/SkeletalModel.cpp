@@ -1,4 +1,5 @@
 #include "SkeletalModel.h"
+#include "util.h"
 
 #include <FL/Fl.H>
 
@@ -64,12 +65,12 @@ void SkeletalModel::loadSkeleton(const char *filename) {
   }
 }
 
-void SkeletalModel::visitAndDraw(const Joint* joint) {
+void SkeletalModel::visitAndDrawJoint(const Joint* joint) {
   m_matrixStack.push(joint->transform);
   glutSolidSphere(0.025f, 12, 12);
 
   for (const auto& child : joint->children) {
-    visitAndDraw(child);
+    visitAndDrawJoint(child);
   }
   m_matrixStack.pop();
 }
@@ -85,12 +86,39 @@ void SkeletalModel::drawJoints() {
   // (glPushMatrix, glPopMatrix, glMultMatrix).
   // You should use your MatrixStack class
   // and use glLoadMatrix() before your drawing call.
-  visitAndDraw(m_rootJoint);
+  visitAndDrawJoint(m_rootJoint);
 }
 
-void SkeletalModel::drawSkeleton( )
-{
-	// Draw boxes between the joints. You will need to add a recursive helper function to traverse the joint hierarchy.
+void SkeletalModel::visitAndDrawBone(const Joint *joint, const Joint* par) {
+  if (par != nullptr) {
+    const auto translate = Matrix4f::translation(0, 0, 0.5);
+
+    const auto eye = joint->transform.getCol(3).xyz();
+    const float l = eye.abs();
+    const auto scale = Matrix4f::scaling(0.025 / 0.5, 0.025 / 0.5, l);
+
+    const auto center = Vector3f::ZERO;
+    const auto z = (eye - center).normalized();
+    const auto up = Vector3f::cross(z, Vector3f(0, 0, 1)).normalized();
+    const auto look = Matrix4f::lookAt(eye, center, up);
+
+    const auto mat = look * scale * translate;
+
+    m_matrixStack.push(mat);
+    glutSolidCube(1.0);
+    m_matrixStack.pop();
+  }
+  m_matrixStack.push(joint->transform);
+  for (const auto& child : joint->children) {
+    visitAndDrawBone(child, joint);
+  }
+  m_matrixStack.pop();
+}
+
+void SkeletalModel::drawSkeleton() {
+  // Draw boxes between the joints. You will need to add a recursive helper
+  // function to traverse the joint hierarchy.
+  visitAndDrawBone(m_rootJoint);
 }
 
 void SkeletalModel::setJointTransform(int jointIndex, float rX, float rY, float rZ)
