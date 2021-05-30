@@ -157,11 +157,13 @@ void SkeletalModel::drawSkeleton() {
   visitAndDrawBone(m_rootJoint);
 }
 
-void SkeletalModel::setJointTransform(int jointIndex, float rX, float rY, float rZ)
-{
-	// Set the rotation part of the joint's transformation matrix based on the passed in Euler angles.
+void SkeletalModel::setJointTransform(int jointIndex, float rX, float rY,
+                                      float rZ) {
+  // Set the rotation part of the joint's transformation matrix based on the
+  // passed in Euler angles.
+  const auto rot = Matrix3f::rotateX(rX) * Matrix3f::rotateY(rY) * Matrix3f::rotateZ(rZ);
+  m_joints[jointIndex]->transform.setSubmatrix3x3(0, 0, rot);
 }
-
 
 void SkeletalModel::computeBindWorldToJointTransforms()
 {
