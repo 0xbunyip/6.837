@@ -16,28 +16,26 @@ void SkeletalModel::load(const char *skeletonFile, const char *meshFile, const c
 	updateCurrentJointToWorldTransforms();
 }
 
-void SkeletalModel::draw(Matrix4f cameraMatrix, bool skeletonVisible)
-{
-	// draw() gets called whenever a redraw is required
-	// (after an update() occurs, when the camera moves, the window is resized, etc)
+void SkeletalModel::draw(Matrix4f cameraMatrix, bool skeletonVisible) {
+  // draw() gets called whenever a redraw is required
+  // (after an update() occurs, when the camera moves, the window is resized,
+  // etc)
 
-	m_matrixStack.clear();
-	m_matrixStack.push(cameraMatrix);
+  m_matrixStack.clear();
+  m_matrixStack.push(cameraMatrix);
 
-	if( skeletonVisible )
-	{
-		drawJoints();
+  if (skeletonVisible) {
+    drawJoints();
 
-		drawSkeleton();
-	}
-	else
-	{
-		// Clear out any weird matrix we may have been using for drawing the bones and revert to the camera matrix.
-		glLoadMatrixf(m_matrixStack.top());
+    drawSkeleton();
+  } else {
+    // Clear out any weird matrix we may have been using for drawing the bones
+    // and revert to the camera matrix.
+    glLoadMatrixf(m_matrixStack.top());
 
-		// Tell the mesh to draw itself.
-		m_mesh.draw();
-	}
+    // Tell the mesh to draw itself.
+    m_mesh.draw();
+  }
 }
 
 void SkeletalModel::loadSkeleton(const char *filename) {
@@ -107,32 +105,41 @@ void SkeletalModel::drawJoints() {
 
 void SkeletalModel::visitAndDrawBone(const Joint *joint, const Joint* par) {
   if (par != nullptr) {
+    // Draw bone in new basis (RIGHT, UP, -FORWARD).
     const auto translate = Matrix4f::translation(0, 0, 0.5);
 
     const auto eye = joint->transform.getCol(3).xyz();
     const float l = eye.abs();
     const auto scale = Matrix4f::scaling(0.010 / 0.5, 0.010 / 0.5, l);
 
-    const auto origin = par->transform.getCol(3).xyz();
+    // Frame with origin == (0, 0, 0), z == (joint - par).
     const auto b3 = eye.normalized(); // z
     const auto b2 = Vector3f::cross(b3, Vector3f(0, 0, 1)).normalized(); // y
     const auto b1 = Vector3f::cross(b2, b3).normalized(); // x
 
-    const Matrix4f transform = Matrix4f(
-        Vector3f::dot(b1, Vector3f::RIGHT), Vector3f::dot(b2, Vector3f::RIGHT),
-        Vector3f::dot(b3, Vector3f::RIGHT), 0, Vector3f::dot(b1, Vector3f::UP),
-        Vector3f::dot(b2, Vector3f::UP), Vector3f::dot(b3, Vector3f::UP), 0,
-        Vector3f::dot(b1, -Vector3f::FORWARD),
-        Vector3f::dot(b2, -Vector3f::FORWARD),
-        Vector3f::dot(b3, -Vector3f::FORWARD), 0, origin.x(), origin.y(),
-        origin.z(), 1);
+    // Basis of above frame in (RIGHT, UP, -FORWARD) basis.
+    const auto b1p = Vector4f(Vector3f::dot(b1, Vector3f::RIGHT),
+                              Vector3f::dot(b1, Vector3f::UP),
+                              Vector3f::dot(b1, -Vector3f::FORWARD), //
+                              0);
+    const auto b2p = Vector4f(Vector3f::dot(b2, Vector3f::RIGHT),
+                              Vector3f::dot(b2, Vector3f::UP),
+                              Vector3f::dot(b2, -Vector3f::FORWARD), //
+                              0);
+    const auto b3p = Vector4f(Vector3f::dot(b3, Vector3f::RIGHT),
+                              Vector3f::dot(b3, Vector3f::UP),
+                              Vector3f::dot(b3, -Vector3f::FORWARD), //
+                              0);
+    const auto op = Vector4f(0, 0, 0, 1);
+    const Matrix4f transform = Matrix4f(b1p, b2p, b3p, op);
 
     const auto mat = transform * scale * translate;
     // LOG(eye, l, z, up);
-    LOG(b1, b2, b3);
-    LOG(transform);
+    // LOG(b1, b2, b3);
+    // LOG(transform);
     // LOG(mat);
 
+    // LOG(m_matrixStack.top());
     m_matrixStack.push(mat);
     glutSolidCube(1.0);
     m_matrixStack.pop();
