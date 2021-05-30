@@ -159,10 +159,6 @@ void SkeletalModel::drawSkeleton() {
 
 void SkeletalModel::setJointTransform(int jointIndex, float rX, float rY,
                                       float rZ) {
-  // jointIndex = 1;
-  // rX = rY = 0;
-  // rZ = M_PI / 2;
-
   // Set the rotation part of the joint's transformation matrix based on the
   // passed in Euler angles.
   const auto rot = Matrix3f::rotateX(rX) * Matrix3f::rotateY(rY) * Matrix3f::rotateZ(rZ);
@@ -189,6 +185,7 @@ void SkeletalModel::computeBindWorldToJointTransforms() {
   // This method should update each joint's bindWorldToJointTransform.
   // You will need to add a recursive helper function to traverse the joint
   // hierarchy.
+  m_matrixStack.clear();
   visitAndComputeBindWorldToJointTransforms(m_rootJoint);
 }
 
@@ -212,6 +209,7 @@ void SkeletalModel::updateCurrentJointToWorldTransforms() {
   // This method should update each joint's bindWorldToJointTransform.
   // You will need to add a recursive helper function to traverse the joint
   // hierarchy.
+  m_matrixStack.clear();
   visitAndComputeCurrentJointToWorldTransforms(m_rootJoint);
 }
 
@@ -223,19 +221,14 @@ void SkeletalModel::updateMesh() {
   // and the current joint --> world transforms.
   for (int i = 0; i < m_mesh.bindVertices.size(); ++i) {
     auto p = Vector4f(m_mesh.bindVertices[i], 1);
-    // LOG(p);
     Vector4f q(0.0);
 
     for (int j = 0; j < m_mesh.attachments[i].size(); ++j) {
       auto w = m_mesh.attachments[i][j];
       const auto joint = m_joints[j + 1];
-      // LOG(j, w);
-      // LOG(j, joint->currentJointToWorldTransform);
-      // LOG(j, joint->bindWorldToJointTransform);
       q = q + w * (joint->currentJointToWorldTransform *
                    joint->bindWorldToJointTransform * p);
     }
-    // LOG(q);
     m_mesh.currentVertices[i] = q.xyz();
   }
 }
