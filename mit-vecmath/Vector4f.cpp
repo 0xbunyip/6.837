@@ -363,3 +363,9 @@ bool operator != ( const Vector4f& v0, const Vector4f& v1 )
 {
     return !( v0 == v1 );
 }
+
+std::ostream& operator<<(std::ostream& os, const Vector4f& v) {
+  os << "< " << v.m_elements[0] << ", " << v.m_elements[1] << ", "
+     << v.m_elements[2] << ", " << v.m_elements[3] << " >";
+  return os;
+}

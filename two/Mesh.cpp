@@ -79,7 +79,7 @@ void Mesh::loadAttachments(const char *filename, int numJoints) {
   float w;
   for (int i = 0; i < currentVertices.size(); ++i) {
     vector<float> attachment;
-    for (int j = 0; j < numJoints; ++j) {
+    for (int j = 0; j < numJoints - 1; ++j) {
       in >> w;
       attachment.push_back(w);
     }

@@ -1,6 +1,7 @@
 #include "ModelerView.h"
 #include "camera.h"
 #include "modelerapp.h"
+#include "util.h"
 
 #include <FL/Fl.H>
 #include <FL/Fl_Gl_Window.H>
@@ -15,7 +16,7 @@
 ModelerView::ModelerView(int x, int y, int w, int h,
 			 const char *label):Fl_Gl_Window(x, y, w, h, label)
 {
-    m_camera = new Camera();	
+    m_camera = new Camera();
 
     m_camera->SetDimensions( w, h );
     m_camera->SetDistance( 2 );
@@ -49,7 +50,7 @@ int ModelerView::handle( int event )
     unsigned eventCoordX = Fl::event_x();
     unsigned eventCoordY = Fl::event_y();
     unsigned eventButton = Fl::event_button();
-    unsigned eventState  = Fl::event_state();	
+    unsigned eventState  = Fl::event_state();
 
     switch( event )
     {
@@ -82,7 +83,7 @@ int ModelerView::handle( int event )
 		{
             m_camera->MouseRelease(eventCoordX, eventCoordY);
 		}
-		break;	
+		break;
 
     case FL_KEYUP:
     	{
@@ -98,6 +99,9 @@ int ModelerView::handle( int event )
 				m_drawSkeleton = !m_drawSkeleton;
 				cout << "drawSkeleton is now: " << m_drawSkeleton << endl;
 			}
+      else if (key == 'd') {
+        update();
+      }
     	}
 		break;
 
@@ -110,16 +114,15 @@ int ModelerView::handle( int event )
     return 1;
 }
 
-void ModelerView::update()
-{
-	// update the skeleton from sliders
-	updateJoints();
+void ModelerView::update() {
+  // update the skeleton from sliders
+  updateJoints();
 
-	// Update the bone to world transforms for SSD.
-	model.updateCurrentJointToWorldTransforms();
+  // Update the bone to world transforms for SSD.
+  model.updateCurrentJointToWorldTransforms();
 
-	// update the mesh given the new skeleton
-	model.updateMesh();
+  // update the mesh given the new skeleton
+  model.updateMesh();
 }
 
 void ModelerView::updateJoints()
@@ -149,24 +152,24 @@ void ModelerView::draw()
         glEnable( GL_LIGHTING );
         glEnable( GL_LIGHT0 );
         glEnable( GL_NORMALIZE );
-        
+
         m_camera->SetDimensions(w(),h());
         m_camera->SetViewport(0,0,w(),h());
         m_camera->ApplyViewport();
-        
+
         glMatrixMode( GL_PROJECTION );
         glLoadIdentity();
         m_camera->SetPerspective( 50.0f );
         glLoadMatrixf( m_camera->projectionMatrix() );
     }
-        
+
     glMatrixMode( GL_MODELVIEW );
     glLoadIdentity();
 
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
     // Note that the lighting is applied *before* applying the camera
-    // transform.  This is so the light appeared fixed on the camera.    
+    // transform.  This is so the light appeared fixed on the camera.
     GLfloat Lt0diff[] = {1.0,1.0,1.0,1.0};
     GLfloat Lt0pos[] = {3.0,3.0,5.0,1.0};
     glLightfv(GL_LIGHT0, GL_DIFFUSE, Lt0diff);
@@ -176,7 +179,7 @@ void ModelerView::draw()
     GLfloat diffColor[] = {0.4f, 0.4f, 0.4f, 1.f};
     GLfloat specColor[] = {0.6f, 0.6f, 0.6f, 1.f};
     GLfloat shininess[] = {50.0f};
-    
+
     glMaterialfv( GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, diffColor );
     glMaterialfv( GL_FRONT_AND_BACK, GL_SPECULAR, specColor );
     glMaterialfv( GL_FRONT_AND_BACK, GL_SHININESS, shininess );

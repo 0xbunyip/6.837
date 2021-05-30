@@ -74,6 +74,8 @@ public:
 private:
   void visitAndDrawJoint(const Joint *joint);
   void visitAndDrawBone(const Joint *joint, const Joint *par = nullptr);
+  void visitAndComputeBindWorldToJointTransforms(Joint *joint);
+  void visitAndComputeCurrentJointToWorldTransforms(Joint *joint);
 
   // pointer to the root joint
   Joint *m_rootJoint;

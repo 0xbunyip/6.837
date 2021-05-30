@@ -1,11 +1,12 @@
 #ifndef VECTOR_4F_H
 #define VECTOR_4F_H
 
+#include <iostream>
+
 class Vector2f;
 class Vector3f;
 
-class Vector4f
-{
+class Vector4f {
 public:
 
 	Vector4f( float f = 0.f );
@@ -71,15 +72,16 @@ public:
 	// ---- Utility ----
 	operator const float* () const; // automatic type conversion for OpenGL
 	operator float* (); // automatic type conversion for OpenG
-	void print() const; 
+        void print() const;
 
-	static float dot( const Vector4f& v0, const Vector4f& v1 );
+        static float dot(const Vector4f &v0, const Vector4f &v1);
 	static Vector4f lerp( const Vector4f& v0, const Vector4f& v1, float alpha );
+
+  friend std::ostream& operator<<(std::ostream& os, const Vector4f& v);
 
 private:
 
 	float m_elements[ 4 ];
-
 };
 
 // component-wise operators
