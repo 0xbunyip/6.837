@@ -165,16 +165,16 @@ void SkeletalModel::setJointTransform(int jointIndex, float rX, float rY,
   m_joints[jointIndex]->transform.setSubmatrix3x3(0, 0, rot);
 }
 
-void SkeletalModel::computeBindWorldToJointTransforms()
-{
-	// 2.3.1. Implement this method to compute a per-joint transform from
-	// world-space to joint space in the BIND POSE.
-	//
-	// Note that this needs to be computed only once since there is only
-	// a single bind pose.
-	//
-	// This method should update each joint's bindWorldToJointTransform.
-	// You will need to add a recursive helper function to traverse the joint hierarchy.
+void SkeletalModel::computeBindWorldToJointTransforms() {
+  // 2.3.1. Implement this method to compute a per-joint transform from
+  // world-space to joint space in the BIND POSE.
+  //
+  // Note that this needs to be computed only once since there is only
+  // a single bind pose.
+  //
+  // This method should update each joint's bindWorldToJointTransform.
+  // You will need to add a recursive helper function to traverse the joint
+  // hierarchy.
 }
 
 void SkeletalModel::updateCurrentJointToWorldTransforms()
