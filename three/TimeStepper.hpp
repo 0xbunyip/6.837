@@ -1,7 +1,7 @@
 #ifndef INTEGRATOR_H
 #define INTEGRATOR_H
 
-#include "vecmath.h"
+#include <vecmath/vecmath.h>
 #include <vector>
 #include "particleSystem.h"
 

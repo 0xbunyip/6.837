@@ -2,7 +2,7 @@
 #define PARTICLESYSTEM_H
 
 #include <vector>
-#include <vecmath.h>
+#include <vecmath/vecmath.h>
 
 using namespace std;
 

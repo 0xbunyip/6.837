@@ -1,7 +1,7 @@
 #ifndef CLOTHSYSTEM_H
 #define CLOTHSYSTEM_H
 
-#include <vecmath.h>
+#include <vecmath/vecmath.h>
 #include <vector>
 
 #include "particleSystem.h"

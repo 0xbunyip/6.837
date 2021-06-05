@@ -1,7 +1,7 @@
 #ifndef PENDULUMSYSTEM_H
 #define PENDULUMSYSTEM_H
 
-#include <vecmath.h>
+#include <vecmath/vecmath.h>
 #include <vector>
 #include <GL/glut.h>
 
