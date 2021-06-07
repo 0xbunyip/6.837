@@ -6,7 +6,7 @@
 template<typename V, typename E>
 class Graph {
   V& v(const int i) { return v_[i]; }
-  E& v(const int i) { return e_[i]; }
+  E& e(const int i) { return e_[i]; }
 
   int addV(const V& v) {
     v_.push_back(v);
