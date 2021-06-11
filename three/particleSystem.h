@@ -25,8 +25,6 @@ public:
 
 	virtual void draw() = 0;
 
-  virtual ~ParticleSystem();
-
 protected:
 
 	vector<Vector3f> m_vVecState;

@@ -17,7 +17,6 @@ public:
 
 	vector<Vector3f> evalF(vector<Vector3f> state);
   void draw();
-  ~PendulumSystem(){};
 
 private:
   Graph<std::unique_ptr<Particle>, std::unique_ptr<Spring>> graph_;

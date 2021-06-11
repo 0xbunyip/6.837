@@ -12,15 +12,11 @@ using namespace std;
 class SimpleSystem: public ParticleSystem
 {
 public:
-	SimpleSystem();
+  SimpleSystem();
+  vector<Vector3f> evalF(vector<Vector3f> state);
+  void draw();
 
-	vector<Vector3f> evalF(vector<Vector3f> state);
-
-	void draw();
-
-        ~SimpleSystem(){};
-
-      private:
+private:
 };
 
 #endif

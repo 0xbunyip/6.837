@@ -1,4 +1,5 @@
 #include "particle.hpp"
+#include "util.h"
 
 #include <memory>
 #include <vecmath/vecmath.h>
@@ -11,7 +12,10 @@ std::unique_ptr<Particle> Particle::Copy(const Vector3f &p, const Vector3f &v) {
   return part;
 }
 
-Vector3f Particle::netForce() { return GRAVITY * m_; }
+Vector3f Particle::netForce() {
+  LOG(GRAVITY);
+  return GRAVITY * m_;
+}
 
 Vector3f& FixedParticle::p() {
   p2_ = p_;
@@ -23,7 +27,10 @@ Vector3f &FixedParticle::v() {
   return v2_;
 }
 
-Vector3f FixedParticle::netForce() { return GRAVITY * m_; }
+Vector3f FixedParticle::netForce() {
+  LOG(GRAVITY);
+  return GRAVITY * m_;
+}
 
 std::unique_ptr<Particle> FixedParticle::Copy(const Vector3f &p,
                                               const Vector3f &v) {
@@ -37,4 +44,7 @@ std::unique_ptr<Particle> VParticle::Copy(const Vector3f &p,
   return part;
 }
 
-Vector3f VParticle::netForce() { return GRAVITY * m_; }
+Vector3f VParticle::netForce() {
+  LOG(GRAVITY);
+  return GRAVITY * m_;
+}

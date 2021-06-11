@@ -32,8 +32,12 @@ vector<Vector3f> PendulumSystem::evalF(vector<Vector3f> state) {
     std::unique_ptr<Particle> part =
         graph_.v(i)->Copy(state[i * 2], state[i * 2 + 1]);
 
-    f.push_back(state[i * 2 + 1]);
-    f.push_back(part->netForce() / part->m());
+    auto v = state[i * 2 + 1];
+    auto a = part->netForce() / part->m();
+    LOG(v);
+    LOG(a);
+    f.push_back(v);
+    f.push_back(a);
   }
 	return f;
 }
@@ -41,7 +45,7 @@ vector<Vector3f> PendulumSystem::evalF(vector<Vector3f> state) {
 // render the system (ie draw the particles)
 void PendulumSystem::draw() {
   for (int i = 0; i < m_numParticles; i++) {
-    Vector3f pos; //  position of particle i. YOUR CODE HERE
+    Vector3f pos(m_vVecState[i]); //  position of particle i. YOUR CODE HERE
     glPushMatrix();
     glTranslatef(pos[0], pos[1], pos[2]);
     glutSolidSphere(0.075f, 10.0f, 10.0f);
