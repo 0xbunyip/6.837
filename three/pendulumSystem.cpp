@@ -1,38 +1,39 @@
 #include "pendulumSystem.h"
-#include "graph.hpp"
+#include "util.h"
 
-using std::unique_ptr;
+#include <memory>
 
-PendulumSystem::PendulumSystem(int numParticles):ParticleSystem(numParticles) {
-	m_numParticles = numParticles;
+PendulumSystem::PendulumSystem(int numParticles)
+    : ParticleSystem(numParticles) {
+  LOG(numParticles);
+  m_numParticles = numParticles;
 
-	// fill in code for initializing the state based on the number of particles
-  unique_ptr<Particle> p0 = new FixedParticle(Vector3f(0, 0, 0));
-  Particle p1 = new VParticle(Vector3f(0, -2, 0), 1, 0.1);
+  // fill in code for initializing the state based on the number of particles
+  std::unique_ptr<Particle> p0(new FixedParticle(Vector3f::ZERO));
+  std::unique_ptr<Particle> p1(
+      new VParticle(Vector3f(0, -2, 0), Vector3f::ZERO, 1.0, 0.1));
 
-  Graph<unique_ptr<Particle>, unique_ptr<Spring>> graph;
-  int i0 = graph.addV(p0);
-  int i1 = graph.addV(p1);
-  graph.addE(Spring(1, 0.2), i0, i1);
+  int i0 = graph_.addV(std::move(p0));
+  int i1 = graph_.addV(std::move(p1));
+  std::unique_ptr<Spring> s(new Spring(1, 0.2));
+  graph_.addE(std::move(s), i0, i1);
 
   for (int i = 0; i < m_numParticles; i++) {
     // for this system, we care about the position and the velocity
-    m_vVecState.push_back(graph.v(i).p());
-    m_vVecState.push_back(graph.v(i).v());
+    m_vVecState.push_back(graph_.v(i)->p());
+    m_vVecState.push_back(graph_.v(i)->v());
   }
 }
 
-
-// TODO: implement evalF
 // for a given state, evaluate f(X,t)
 vector<Vector3f> PendulumSystem::evalF(vector<Vector3f> state) {
-	vector<Vector3f> f;
+  vector<Vector3f> f;
   for (int i = 0; i < m_numParticles; ++i) {
-    unique_ptr<Particle> part =
-        graph.v(i)->Copy(state[i * 2], state[i * 2 + 1]);
+    std::unique_ptr<Particle> part =
+        graph_.v(i)->Copy(state[i * 2], state[i * 2 + 1]);
 
     f.push_back(state[i * 2 + 1]);
-    f.push_back(part->F() / part->m());
+    f.push_back(part->netForce() / part->m());
   }
 	return f;
 }

@@ -5,16 +5,19 @@
 #include <memory>
 
 constexpr float G_CONSTANT = 9.81;
-// constexpr Vector3f G_DIR = Vector3f(0, -1, 0);
-// constexpr Vector3f GRAVITY = G_CONSTANT * G_DIR;
+static const Vector3f G_DIR = Vector3f(0, -1, 0);
+static const Vector3f GRAVITY = G_CONSTANT * G_DIR;
 
 class Particle {
 public:
   Particle(const Vector3f& p, const Vector3f& v, const float m): p_(p), v_(v), m_(m) {}
 
+  float m() { return m_; }
+
   virtual Vector3f& p();
   virtual Vector3f& v();
   virtual std::unique_ptr<Particle> Copy(const Vector3f &p, const Vector3f &v);
+  virtual Vector3f netForce();
 
 protected:
   Vector3f p_, v_;
@@ -27,6 +30,7 @@ public:
 
   Vector3f& p() override;
   Vector3f& v() override;
+  Vector3f netForce() override;
   std::unique_ptr<Particle> Copy(const Vector3f &p, const Vector3f &v) override;
 
 private:
@@ -34,12 +38,14 @@ private:
 };
 
 class VParticle : public Particle {
+public:
   VParticle(const Vector3f& p, const Vector3f& v, const float m, const float kv): Particle(p, v, m), kv_(kv) {}
 
   std::unique_ptr<Particle> Copy(const Vector3f &p, const Vector3f &v) override;
+  Vector3f netForce() override;
 
 private:
   float kv_;
-}
+};
 
 #endif

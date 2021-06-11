@@ -11,7 +11,9 @@
 
 ///TODO: include more headers if necessary
 
+#include "ClothSystem.h"
 #include "TimeStepper.hpp"
+#include "pendulumSystem.h"
 #include "simpleSystem.h"
 
 using namespace std;
@@ -20,6 +22,7 @@ using namespace std;
 namespace {
 
 ParticleSystem *system;
+int systemId = 0;
 TimeStepper *timeStepper;
 float stepsize = 0.04f;
 
@@ -27,7 +30,7 @@ float stepsize = 0.04f;
 void initSystem(int argc, char *argv[]) {
   // seed the random number generator with the current time
   srand(time(NULL));
-  system = new SimpleSystem();
+  system = new PendulumSystem(2);
   string stepper = argv[1];
   if (stepper == "e") {
     timeStepper = new ForwardEuler();
@@ -104,6 +107,20 @@ void keyboardFunc(unsigned char key, int x, int y) {
     Matrix4f eye = Matrix4f::identity();
     camera.SetRotation(eye);
     camera.SetCenter(Vector3f::ZERO);
+    break;
+  }
+  case 't': {
+    systemId = (systemId + 1) % 3;
+    LOG(systemId);
+    if (systemId == 0) {
+      system = new SimpleSystem();
+    } else if (systemId == 1) {
+      LOG("ASD");
+      system = new PendulumSystem(2);
+      LOG("ASDASD");
+    } else {
+      system = new ClothSystem();
+    }
     break;
   }
   default:

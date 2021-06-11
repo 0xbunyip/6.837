@@ -26,9 +26,10 @@
 // };
 
 class Spring {
+public:
   Spring(const float r, const float k): r_(r), k_(k) {}
 
-public:
+private:
   float r_, k_;
 };
 

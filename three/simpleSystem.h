@@ -18,7 +18,9 @@ public:
 
 	void draw();
 
-private:
+        ~SimpleSystem(){};
+
+      private:
 };
 
 #endif
