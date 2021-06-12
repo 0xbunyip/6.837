@@ -4,7 +4,7 @@
 #include <vecmath/vecmath.h>
 #include <memory>
 
-constexpr float G_CONSTANT = 0.2;
+constexpr float G_CONSTANT = 0.4;
 static const Vector3f G_DIR = Vector3f(0, -1, 0);
 static const Vector3f GRAVITY = G_CONSTANT * G_DIR;
 

@@ -5,19 +5,25 @@
 
 PendulumSystem::PendulumSystem(int numParticles)
     : ParticleSystem(numParticles) {
-  LOG(numParticles);
+  numParticles = 3;
   m_numParticles = numParticles;
 
   // fill in code for initializing the state based on the number of particles
   const float kViscousDrag = 0.0;
-  std::unique_ptr<Particle> p0(new FixedParticle(Vector3f(0, -1, 0)));
+  std::unique_ptr<Particle> p0(new FixedParticle(Vector3f(0, 0, 0)));
   std::unique_ptr<Particle> p1(
-      new VParticle(Vector3f(0, -2, 0), Vector3f::ZERO, 1.0, kViscousDrag));
+      new VParticle(Vector3f(-1, -1, 0), Vector3f::ZERO, 1.0, kViscousDrag));
+  std::unique_ptr<Particle> p2(
+      new VParticle(Vector3f(1, -2, 0), Vector3f::ZERO, 1.0, kViscousDrag));
 
   int i0 = graph_.addV(std::move(p0));
   int i1 = graph_.addV(std::move(p1));
-  std::unique_ptr<Spring> s(new Spring(1, 0.2));
+  int i2 = graph_.addV(std::move(p2));
+  std::unique_ptr<Spring> s(new Spring(1, 0.6));
   graph_.addE(std::move(s), i0, i1);
+
+  std::unique_ptr<Spring> s2(new Spring(1, 0.5));
+  graph_.addE(std::move(s2), i1, i2);
 
   for (int i = 0; i < m_numParticles; i++) {
     // for this system, we care about the position and the velocity
