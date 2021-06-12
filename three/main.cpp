@@ -22,15 +22,24 @@ using namespace std;
 namespace {
 
 ParticleSystem *system;
-int systemId = 0;
+int systemId = 2;
 TimeStepper *timeStepper;
 float stepsize = 0.04f;
+
+ParticleSystem *newParticleSystem(int id) {
+  if (id == 0) {
+    return new SimpleSystem();
+  } else if (id == 1) {
+    return new PendulumSystem(2);
+  }
+  return new ClothSystem();
+}
 
 // initialize your particle systems
 void initSystem(int argc, char *argv[]) {
   // seed the random number generator with the current time
   srand(time(NULL));
-  system = new PendulumSystem(2);
+  system = newParticleSystem(systemId);
   string stepper = argv[1];
   if (stepper == "e") {
     timeStepper = new ForwardEuler();
@@ -109,16 +118,7 @@ void keyboardFunc(unsigned char key, int x, int y) {
   }
   case 't': {
     systemId = (systemId + 1) % 3;
-    LOG(systemId);
-    if (systemId == 0) {
-      system = new SimpleSystem();
-    } else if (systemId == 1) {
-      LOG("ASD");
-      system = new PendulumSystem(2);
-      LOG("ASDASD");
-    } else {
-      system = new ClothSystem();
-    }
+    system = newParticleSystem(systemId);
     break;
   }
   default:

@@ -4,7 +4,10 @@
 #include <vecmath/vecmath.h>
 #include <vector>
 
+#include "graph.hpp"
+#include "particle.hpp"
 #include "particleSystem.h"
+#include "spring.hpp"
 
 class ClothSystem: public ParticleSystem
 {
@@ -15,6 +18,7 @@ public:
   void draw();
 
 private:
+  Graph<std::unique_ptr<Particle>, std::unique_ptr<Spring>> graph_;
 };
 
 #endif
