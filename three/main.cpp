@@ -68,14 +68,12 @@ void drawSystem() {
 
   system->draw();
 
-
-  glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, floorColor);
-  glPushMatrix();
-  glTranslatef(0.0f,-5.0f,0.0f);
-  glScaled(50.0f,0.01f,50.0f);
-  glutSolidCube(1);
-  glPopMatrix();
-
+  // glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, floorColor);
+  // glPushMatrix();
+  // glTranslatef(0.0f,-5.0f,0.0f);
+  // glScaled(50.0f,0.01f,50.0f);
+  // glutSolidCube(1);
+  // glPopMatrix();
 }
 
 //-------------------------------------------------------------------
@@ -247,13 +245,13 @@ void drawScene(void) {
     glVertex3f(0, 0, 0);
     glVertex3f(0, 0, 1);
 
-    glColor4f(0.5, 0.5, 0.5, 1);
-    glVertex3f(0, 0, 0);
-    glVertex3f(-1, 0, 0);
-    glVertex3f(0, 0, 0);
-    glVertex3f(0, -1, 0);
-    glVertex3f(0, 0, 0);
-    glVertex3f(0, 0, -1);
+    // glColor4f(0.5, 0.5, 0.5, 1);
+    // glVertex3f(0, 0, 0);
+    // glVertex3f(-1, 0, 0);
+    // glVertex3f(0, 0, 0);
+    // glVertex3f(0, -1, 0);
+    // glVertex3f(0, 0, 0);
+    // glVertex3f(0, 0, -1);
 
     glEnd();
     glPopMatrix();
