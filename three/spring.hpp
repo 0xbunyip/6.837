@@ -1,6 +1,8 @@
 #ifndef SPRING_H
 #define SPRING_H
 
+#include <vecmath/vecmath.h>
+
 // class Force {
 //   Force(const Vector3f& v): v_(v) {};
 //
@@ -28,6 +30,7 @@
 class Spring {
 public:
   Spring(const float r, const float k): r_(r), k_(k) {}
+  Vector3f Force(const Vector3f& xi, const Vector3f& xj);
 
 private:
   float r_, k_;

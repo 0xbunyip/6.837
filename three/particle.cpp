@@ -12,9 +12,8 @@ std::unique_ptr<Particle> Particle::Copy(const Vector3f &p, const Vector3f &v) {
   return part;
 }
 
-Vector3f Particle::netForce() {
-  LOG(GRAVITY);
-  return GRAVITY * m_;
+Vector3f Particle::netForce(const Vector3f &externalForce) {
+  return GRAVITY * m_ + externalForce;
 }
 
 Vector3f& FixedParticle::p() {
@@ -27,9 +26,8 @@ Vector3f &FixedParticle::v() {
   return v2_;
 }
 
-Vector3f FixedParticle::netForce() {
-  LOG(GRAVITY);
-  return GRAVITY * m_;
+Vector3f FixedParticle::netForce(const Vector3f &externalForce) {
+  return Vector3f::ZERO;
 }
 
 std::unique_ptr<Particle> FixedParticle::Copy(const Vector3f &p,
@@ -44,7 +42,8 @@ std::unique_ptr<Particle> VParticle::Copy(const Vector3f &p,
   return part;
 }
 
-Vector3f VParticle::netForce() {
-  LOG(GRAVITY);
-  return GRAVITY * m_;
+Vector3f VParticle::netForce(const Vector3f &externalForce) {
+  auto f_gravity = GRAVITY * m_;
+  auto f_drag = v_ * -kv_;
+  return f_gravity + f_drag + externalForce;
 }

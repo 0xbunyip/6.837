@@ -6,6 +6,7 @@ void ForwardEuler::takeStep(ParticleSystem *particleSystem, float stepSize) {
   const auto dx = particleSystem->evalF(state);
   for (int i = 0; i < dx.size(); ++i) {
     state[i] = state[i] + stepSize * dx[i];
+    LOG(i, state[i]);
   }
   particleSystem->setState(state);
 }
