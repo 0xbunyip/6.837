@@ -12,9 +12,11 @@ constexpr float dist = 0.1;
 constexpr float totalMass = 500.0;
 constexpr float kParticleMass = totalMass / n / m;
 constexpr float kViscousDrag = 0.1;
+const Vector3f kWindForce = Vector3f(0, 0, 0.2);
 
 std::default_random_engine generator;
 std::uniform_real_distribution<double> distribution(-0.02, 0.02);
+std::uniform_real_distribution<double> windDistribution(0.2, 0.4);
 
 int getGridIndex(int i, int j) { return i * m + j; }
 
@@ -125,11 +127,13 @@ ClothSystem::ClothSystem() {
 vector<Vector3f> ClothSystem::evalF(vector<Vector3f> state)
 {
   vector<Vector3f> f;
+  Vector3f wind = kWindForce * windDistribution(generator);
   for (int i = 0; i < m_numParticles; ++i) {
     std::unique_ptr<Particle> part =
         graph_.v(i)->Copy(state[i * 2], state[i * 2 + 1]);
 
     Vector3f externalForce(0, 0, 0);
+    externalForce += wind;
     for (const auto &adj : graph_.adj(i)) {
       int eid = adj.eid;
       int j = adj.v;
