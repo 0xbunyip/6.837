@@ -10,7 +10,7 @@ PendulumSystem::PendulumSystem(int numParticles)
 
   // fill in code for initializing the state based on the number of particles
   const float kViscousDrag = 0.01;
-  std::unique_ptr<Particle> p0(new FixedParticle(Vector3f(0, 0, 0)));
+  std::unique_ptr<Particle> p0(new FixedParticle(Vector3f(0, 0, 0), 1.0));
   std::unique_ptr<Particle> p1(
       new VParticle(Vector3f(-1, -1, 0), Vector3f::ZERO, 1.0, kViscousDrag));
   std::unique_ptr<Particle> p2(

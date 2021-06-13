@@ -32,7 +32,7 @@ Vector3f FixedParticle::netForce(const Vector3f &externalForce) {
 
 std::unique_ptr<Particle> FixedParticle::Copy(const Vector3f &p,
                                               const Vector3f &v) {
-  std::unique_ptr<Particle> part(new FixedParticle(p));
+  std::unique_ptr<Particle> part(new FixedParticle(p, m_));
   return part;
 }
 

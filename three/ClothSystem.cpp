@@ -6,12 +6,15 @@
 #include <memory>
 #include <random>
 
-constexpr int n = 3;
-constexpr int m = 4;
-constexpr float dist = 1;
+constexpr int n = 30;
+constexpr int m = 40;
+constexpr float dist = 0.1;
+constexpr float totalMass = 500.0;
+constexpr float kParticleMass = totalMass / n / m;
+constexpr float kViscousDrag = 0.1;
 
 std::default_random_engine generator;
-std::uniform_real_distribution<double> distribution(-0.5, 0.5);
+std::uniform_real_distribution<double> distribution(-0.02, 0.02);
 
 int getGridIndex(int i, int j) { return i * m + j; }
 
@@ -29,23 +32,23 @@ ClothSystem::ClothSystem() {
   };
 
   // fill in code for initializing the state based on the number of particles
-  const float kViscousDrag = 0.01;
   for (int i = 0; i < n; ++i) {
     for (int j = 0; j < m; ++j) {
-      if (i + j == 0) {
-        std::unique_ptr<Particle> p(new FixedParticle(Vector3f(0, 0, 0)));
+      if (i + j == 0 || (i == 0 && j == m - 1)) {
+        std::unique_ptr<Particle> p(
+            new FixedParticle(Vector3f(j * dist, -i * dist, 0), kParticleMass));
         graph_.addV(std::move(p));
       } else {
-        std::unique_ptr<Particle> p(new VParticle(
-            Vector3f(j * dist, -i * dist, distribution(generator)),
-            Vector3f::ZERO, 1.0, kViscousDrag));
+        std::unique_ptr<Particle> p(
+            new VParticle(Vector3f(j * dist, distribution(generator), i * dist),
+                          Vector3f::ZERO, kParticleMass, kViscousDrag));
         graph_.addV(std::move(p));
       }
     }
   }
 
   // Structural springs.
-  float kSpringConstant = 2.0;
+  float kSpringConstant = 950.0;
   for (int j = 1; j < m; ++j) {
     std::unique_ptr<Spring> s(new Spring(
         getDist(getGridIndex(0, j), getGridIndex(0, j - 1)), kSpringConstant));
@@ -72,6 +75,7 @@ ClothSystem::ClothSystem() {
   }
 
   // Shear springs.
+  kSpringConstant = 20.0;
   for (int i = 1; i < n; ++i) {
     for (int j = 1; j < m; ++j) {
       // (i, j) to (i - 1, j - 1)
@@ -90,6 +94,7 @@ ClothSystem::ClothSystem() {
   }
 
   // Flex springs.
+  kSpringConstant = 20.0;
   for (int i = 0; i + 2 < n; ++i) {
     for (int j = 0; j < m; ++j) {
       // (i, j) to (i + 2, j)
@@ -135,7 +140,11 @@ vector<Vector3f> ClothSystem::evalF(vector<Vector3f> state)
     auto v = state[i * 2 + 1];
     auto a = part->netForce(externalForce) / part->m();
 
-    LOG(i, v, a, part->netForce(externalForce));
+    if (i == getGridIndex(1, 0)) {
+      // LOG(v, a, externalForce);
+    }
+
+    // LOG(i, v, a, part->netForce(externalForce));
     f.push_back(v);
     f.push_back(a);
   }
@@ -143,39 +152,73 @@ vector<Vector3f> ClothSystem::evalF(vector<Vector3f> state)
 }
 
 void ClothSystem::draw() {
-  for (int i = 0; i < m_numParticles; i++) {
-    Vector3f pos(m_vVecState[i * 2]); //  position of particle i. YOUR CODE HERE
-    LOG(i, pos);
-    glPushMatrix();
-    glTranslatef(pos[0], pos[1], pos[2]);
-    glutSolidSphere(0.075f, 10.0f, 10.0f);
-    glPopMatrix();
+  // for (int i = 0; i < m_numParticles; i++) {
+  //   Vector3f pos(m_vVecState[i * 2]); //  position of particle i.
+  //   glPushMatrix();
+  //   glTranslatef(pos[0], pos[1], pos[2]);
+  //   glutSolidSphere(0.075f, 10.0f, 10.0f);
+  //   glPopMatrix();
 
-    for (const auto &adj : graph_.adj(i)) {
-      int j = adj.v;
-      Vector3f xi = m_vVecState[i * 2];
-      Vector3f xj = m_vVecState[j * 2];
+  //   // for (const auto &adj : graph_.adj(i)) {
+  //   //   int j = adj.v;
+  //   //   Vector3f xi = m_vVecState[i * 2];
+  //   //   Vector3f xj = m_vVecState[j * 2];
 
-      glPushMatrix();
-      // glTranslatef(xi[0], xi[1], xi[2]);
+  //   //   glPushMatrix();
+  //   //   // glTranslatef(xi[0], xi[1], xi[2]);
 
-      // Save current state of OpenGL
-      glPushAttrib(GL_ALL_ATTRIB_BITS);
+  //   //   // Save current state of OpenGL
+  //   //   glPushAttrib(GL_ALL_ATTRIB_BITS);
 
-      // This is to draw the axes when the mouse button is down
-      glDisable(GL_LIGHTING);
-      glLineWidth(3);
-      glPushMatrix();
-      glBegin(GL_LINES);
-      glColor4f(0.5, 0.5, 0.5, 1);
-      glVertex3f(xi[0], xi[1], xi[2]);
-      glVertex3f(xj[0], xj[1], xj[2]);
-      glEnd();
-      glPopMatrix();
+  //   //   glDisable(GL_LIGHTING);
+  //   //   glLineWidth(3);
+  //   //   glPushMatrix();
+  //   //   glBegin(GL_LINES);
+  //   //   glColor4f(0.5, 0.5, 0.5, 1);
+  //   //   glVertex3f(xi[0], xi[1], xi[2]);
+  //   //   glVertex3f(xj[0], xj[1], xj[2]);
+  //   //   glEnd();
+  //   //   glPopMatrix();
 
-      glPopAttrib();
-      glPopMatrix();
+  //   //   glPopAttrib();
+  //   //   glPopMatrix();
+  //   // }
+  // }
+
+  GLuint index = glGenLists(1);
+  // compile the display list
+  glNewList(index, GL_COMPILE);
+
+  glBegin(GL_TRIANGLES);
+  for (int i = 0; i + 1 < n; ++i) {
+    for (int j = 0; j + 1 < m; ++j) {
+      Vector3f a = m_vVecState[getGridIndex(i, j) * 2];
+      Vector3f b = m_vVecState[getGridIndex(i, j + 1) * 2];
+      Vector3f c = m_vVecState[getGridIndex(i + 1, j) * 2];
+      Vector3f d = m_vVecState[getGridIndex(i + 1, j + 1) * 2];
+      // LOG(a, b, c, d);
+
+      // adb
+      glVertex3d(a[0], a[1], a[2]);
+      glVertex3d(d[0], d[1], d[2]);
+      glVertex3d(b[0], b[1], b[2]);
+      auto norm = Vector3f::cross(d - a, b - a).normalized();
+      // LOG(i, j, norm);
+      glNormal3d(norm[0], norm[1], norm[2]);
+
+      // adc
+      glVertex3d(a[0], a[1], a[2]);
+      glVertex3d(c[0], c[1], c[2]);
+      glVertex3d(d[0], d[1], d[2]);
+      norm = Vector3f::cross(c - a, d - a).normalized();
+      glNormal3d(norm[0], norm[1], norm[2]);
     }
   }
+  glEnd();
+
+  // End list.
+  glEndList();
+
+  glCallList(index);
 }
 

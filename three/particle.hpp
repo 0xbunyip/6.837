@@ -26,7 +26,7 @@ protected:
 
 class FixedParticle : public Particle {
 public:
-  FixedParticle(const Vector3f& p): Particle(p, Vector3f::ZERO, 1) {}
+  FixedParticle(const Vector3f& p, const float m): Particle(p, Vector3f::ZERO, m) {}
 
   Vector3f& p() override;
   Vector3f& v() override;
