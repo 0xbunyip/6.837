@@ -6,13 +6,13 @@
 #include <memory>
 #include <random>
 
-constexpr int n = 30;
-constexpr int m = 40;
-constexpr float dist = 0.1;
+constexpr int n = 60;
+constexpr int m = 80;
+constexpr float dist = 0.05;
 constexpr float totalMass = 500.0;
 constexpr float kParticleMass = totalMass / n / m;
 constexpr float kViscousDrag = 0.1;
-const Vector3f kWindForce = Vector3f(0, 0, 0.2);
+const Vector3f kWindForce = Vector3f(0, 0, 0.0);
 
 std::default_random_engine generator;
 std::uniform_real_distribution<double> distribution(-0.02, 0.02);
@@ -50,7 +50,7 @@ ClothSystem::ClothSystem() {
   }
 
   // Structural springs.
-  float kSpringConstant = 950.0;
+  float kSpringConstant = 250.0;
   for (int j = 1; j < m; ++j) {
     std::unique_ptr<Spring> s(new Spring(
         getDist(getGridIndex(0, j), getGridIndex(0, j - 1)), kSpringConstant));
@@ -77,7 +77,7 @@ ClothSystem::ClothSystem() {
   }
 
   // Shear springs.
-  kSpringConstant = 20.0;
+  kSpringConstant = 30.0;
   for (int i = 1; i < n; ++i) {
     for (int j = 1; j < m; ++j) {
       // (i, j) to (i - 1, j - 1)
@@ -96,7 +96,7 @@ ClothSystem::ClothSystem() {
   }
 
   // Flex springs.
-  kSpringConstant = 20.0;
+  kSpringConstant = 30.0;
   for (int i = 0; i + 2 < n; ++i) {
     for (int j = 0; j < m; ++j) {
       // (i, j) to (i + 2, j)
@@ -189,6 +189,44 @@ void ClothSystem::draw() {
   //   // }
   // }
 
+  // Calculate per-vertex normal.
+  std::vector<int> counts(m_numParticles);
+  std::vector<Vector3f> normals(m_numParticles);
+  auto updateNormal = [&](int i, const Vector3f norm) {
+    counts[i]++;
+    normals[i] += norm;
+  };
+
+  for (int i = 0; i + 1 < n; ++i) {
+    for (int j = 0; j + 1 < m; ++j) {
+      int ai = getGridIndex(i, j);
+      int bi = getGridIndex(i, j + 1);
+      int ci = getGridIndex(i + 1, j);
+      int di = getGridIndex(i + 1, j + 1);
+      Vector3f a = m_vVecState[ai * 2];
+      Vector3f b = m_vVecState[bi * 2];
+      Vector3f c = m_vVecState[ci * 2];
+      Vector3f d = m_vVecState[di * 2];
+      // LOG(a, b, c, d);
+
+      // adb
+      auto norm = Vector3f::cross(d - a, b - a).normalized();
+      updateNormal(ai, norm);
+      updateNormal(bi, norm);
+      updateNormal(di, norm);
+
+      // adc
+      norm = Vector3f::cross(c - a, d - a).normalized();
+      updateNormal(ai, norm);
+      updateNormal(ci, norm);
+      updateNormal(di, norm);
+    }
+  }
+  for (int i = 0; i < m_numParticles; ++i) {
+    normals[i] = (normals[i] / counts[i]).normalized();
+    // LOG(i / m, i % m, counts[i]);
+  }
+
   GLuint index = glGenLists(1);
   // compile the display list
   glNewList(index, GL_COMPILE);
@@ -196,26 +234,36 @@ void ClothSystem::draw() {
   glBegin(GL_TRIANGLES);
   for (int i = 0; i + 1 < n; ++i) {
     for (int j = 0; j + 1 < m; ++j) {
-      Vector3f a = m_vVecState[getGridIndex(i, j) * 2];
-      Vector3f b = m_vVecState[getGridIndex(i, j + 1) * 2];
-      Vector3f c = m_vVecState[getGridIndex(i + 1, j) * 2];
-      Vector3f d = m_vVecState[getGridIndex(i + 1, j + 1) * 2];
+      int ai = getGridIndex(i, j);
+      int bi = getGridIndex(i, j + 1);
+      int ci = getGridIndex(i + 1, j);
+      int di = getGridIndex(i + 1, j + 1);
+      Vector3f a = m_vVecState[ai * 2];
+      Vector3f b = m_vVecState[bi * 2];
+      Vector3f c = m_vVecState[ci * 2];
+      Vector3f d = m_vVecState[di * 2];
       // LOG(a, b, c, d);
 
       // adb
       glVertex3d(a[0], a[1], a[2]);
+      glNormal3fv(normals[ai]);
       glVertex3d(d[0], d[1], d[2]);
+      glNormal3fv(normals[di]);
       glVertex3d(b[0], b[1], b[2]);
-      auto norm = Vector3f::cross(d - a, b - a).normalized();
+      glNormal3fv(normals[bi]);
+      // auto norm = Vector3f::cross(d - a, b - a).normalized();
       // LOG(i, j, norm);
-      glNormal3d(norm[0], norm[1], norm[2]);
+      // glNormal3d(norm[0], norm[1], norm[2]);
 
       // adc
       glVertex3d(a[0], a[1], a[2]);
+      glNormal3fv(normals[ai]);
       glVertex3d(c[0], c[1], c[2]);
+      glNormal3fv(normals[ci]);
       glVertex3d(d[0], d[1], d[2]);
-      norm = Vector3f::cross(c - a, d - a).normalized();
-      glNormal3d(norm[0], norm[1], norm[2]);
+      glNormal3fv(normals[di]);
+      // norm = Vector3f::cross(c - a, d - a).normalized();
+      // glNormal3d(norm[0], norm[1], norm[2]);
     }
   }
   glEnd();
