@@ -21,7 +21,11 @@ public:
 
   Vector3f Shade(const Ray &ray, const Hit &hit, const Vector3f &dirToLight,
                  const Vector3f &lightColor) {
-    return Vector3f(1, 1, 1); }
+    auto diffuseWeight = Vector3f::dot(dirToLight, hit.getNormal());
+    diffuseWeight = max(diffuseWeight, 0.0f);
+
+    return diffuseWeight * lightColor * diffuseColor;
+  }
 
  void loadTexture(const char *filename) { t.load(filename); }
 

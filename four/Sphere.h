@@ -50,9 +50,9 @@ public:
     return true;
   }
 
-  protected:
-    Vector3f center_;
-    float radius_;
-  };
+protected:
+  Vector3f center_;
+  float radius_;
+};
 
 #endif

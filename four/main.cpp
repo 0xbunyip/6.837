@@ -52,6 +52,10 @@ int main(int argc, char *argv[]) {
   auto camera = scene.getCamera();
   auto group = scene.getGroup();
 
+  int numLights = scene.getNumLights();
+  auto ambient = scene.getAmbientLight();
+  auto background = scene.getBackgroundColor();
+
   Vector3f pixelColor(1.0f, 0, 0);
   Image image(imWidth, imHeight);
 
@@ -67,10 +71,27 @@ int main(int argc, char *argv[]) {
       auto point = Vector2f(x, y);
       auto ray = camera->generateRay(point);
 
+      Vector3f color;
       Hit hit;
       if (group->intersect(ray, hit, camera->getTMin())) {
-        image.SetPixel(i, j, hit.getMaterial()->getDiffuseColor());
+        auto p = ray.pointAtParameter(hit.getT());
+        auto material = hit.getMaterial();
+
+        color = ambient;
+        for (int k = 0; k < numLights; ++k) {
+          auto light = scene.getLight(k);
+          float distanceToLight = 0; // Unused.
+
+          Vector3f dirToLight, lightColor;
+          light->getIllumination(p, dirToLight, lightColor, distanceToLight);
+
+          color += material->Shade(ray, hit, dirToLight, lightColor);
+        }
+      } else {
+        color = background;
       }
+
+      image.SetPixel(i, j, color);
     }
   }
 
