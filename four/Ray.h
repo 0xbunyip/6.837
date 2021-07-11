@@ -37,7 +37,7 @@ private:
 };
 
 inline ostream &operator<<(ostream &os, const Ray &r) {
-  os << "Ray <" << r.getOrigin() << ", " << r.getDirection() << ">";
+  os << "<o:" << r.getOrigin() << ", d:" << r.getDirection() << ">";
   return os;
 }
 

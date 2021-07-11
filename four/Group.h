@@ -4,6 +4,7 @@
 #include "Hit.h"
 #include "Object3D.h"
 #include "Ray.h"
+#include "util.h"
 
 #include <iostream>
 #include <memory>
@@ -21,9 +22,11 @@ public:
   ~Group() {}
 
   virtual bool intersect(const Ray &r, Hit &h, float tmin) {
+    bool intersected = false;
     for (const auto& obj : objects_) {
-      obj->intersect(r, h, tmin);
+      intersected |= obj->intersect(r, h, tmin);
     }
+    return intersected;
   }
 
   void addObject(int index, Object3D *obj) {

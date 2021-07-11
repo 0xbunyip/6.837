@@ -2,13 +2,14 @@
 #define VECTOR_2F_H
 
 #include <cmath>
+#include <iostream>
 
 class Vector3f;
 
 class Vector2f
 {
 public:
-    
+
     static const Vector2f ZERO;
 	static const Vector2f UP;
 	static const Vector2f RIGHT;
@@ -50,13 +51,13 @@ public:
     void negate();
 
 	// ---- Utility ----
-    operator const float* () const; // automatic type conversion for OpenGL 
-    operator float* (); // automatic type conversion for OpenGL 
-	void print() const;
+    operator const float* () const; // automatic type conversion for OpenGL
+    operator float *();             // automatic type conversion for OpenGL
+    void print() const;
 
-	Vector2f& operator += ( const Vector2f& v );
-	Vector2f& operator -= ( const Vector2f& v );
-	Vector2f& operator *= ( float f );
+    Vector2f &operator+=(const Vector2f &v);
+    Vector2f &operator-=(const Vector2f &v);
+    Vector2f &operator*=(float f);
 
     static float dot( const Vector2f& v0, const Vector2f& v1 );
 
@@ -65,6 +66,7 @@ public:
 	// returns v0 * ( 1 - alpha ) * v1 * alpha
 	static Vector2f lerp( const Vector2f& v0, const Vector2f& v1, float alpha );
 
+    friend std::ostream& operator<<(std::ostream& os, const Vector2f& v);
 private:
 
 	float m_elements[2];

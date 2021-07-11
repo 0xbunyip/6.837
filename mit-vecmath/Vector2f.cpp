@@ -67,10 +67,7 @@ float& Vector2f::y()
     return m_elements[1];
 }
 
-float Vector2f::x() const
-{
-    return m_elements[0];
-}	
+float Vector2f::x() const { return m_elements[0]; }
 
 float Vector2f::y() const
 {
@@ -243,4 +240,9 @@ bool operator == ( const Vector2f& v0, const Vector2f& v1 )
 bool operator != ( const Vector2f& v0, const Vector2f& v1 )
 {
     return !( v0 == v1 );
+}
+
+std::ostream& operator<<(std::ostream& os, const Vector2f& v) {
+  os << "< " << v.m_elements[0] << ", " << v.m_elements[1] << " >";
+  return os;
 }

@@ -17,7 +17,7 @@ public:
   Sphere(Vector3f center, float radius, Material *material)
       : Object3D(material), center_(center), radius_(radius) {}
 
-  ~Sphere() { delete material; }
+  ~Sphere() {}
 
   virtual bool intersect(const Ray &r, Hit &h, float tmin) {
     auto Ro = r.getOrigin();
@@ -50,9 +50,9 @@ public:
     return true;
   }
 
-protected:
-  Vector3f center_;
-  float radius_;
-};
+  protected:
+    Vector3f center_;
+    float radius_;
+  };
 
 #endif

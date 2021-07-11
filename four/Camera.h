@@ -7,6 +7,8 @@
 #include <float.h>
 #include <vecmath/vecmath.h>
 
+#include "util.h"
+
 class Camera {
 public:
   // generate rays for each screen-space coordinate
@@ -30,17 +32,26 @@ public:
     up = up_;
     angle = angle_;
     right = Vector3f::cross(direction, up);
+    d = 1.0 / tan(angle * 0.5);
   }
 
   virtual Ray generateRay(const Vector2f &point) {
-    auto p = (-point.x() * right) + (-point.y() * up);
-    return Ray(center, p - center);
+    LOG(d);
+    LOG(up);
+    LOG(right);
+    LOG(direction);
+    auto p = (point.x() * right) + (point.y() * up) + (d * direction);
+    LOG(p);
+    auto rayDir = p - center;
+    rayDir.normalize();
+    return Ray(center, rayDir);
   }
 
   virtual float getTMin() const { return 0.0f; }
 
 private:
   float angle;
+  float d;
   Vector3f right;
 };
 

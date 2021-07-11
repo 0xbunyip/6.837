@@ -5,9 +5,10 @@
 #include <cmath>
 #include <iostream>
 
-#include "SceneParser.h"
-#include "Image.h"
 #include "Camera.h"
+#include "Image.h"
+#include "SceneParser.h"
+#include "util.h"
 #include <string.h>
 
 using namespace std;
@@ -44,26 +45,39 @@ int main(int argc, char *argv[]) {
   auto scenePath = argv[inputIdx];
   auto imWidth = atoi(argv[sizeIdx]);
   auto imHeight = atoi(argv[sizeIdx + 1]);
+  auto outputPath = argv[outputIdx];
 
   // First, parse the scene using SceneParser.
   auto scene = SceneParser(scenePath);
+  auto camera = scene.getCamera();
+  auto group = scene.getGroup();
+
+  Vector3f pixelColor(1.0f, 0, 0);
+  Image image(imWidth, imHeight);
 
   // Then loop over each pixel in the image, shooting a ray
   // through that pixel and finding its intersection with
   // the scene.  Write the color at the intersection to that
   // pixel in your output image.
+  float aspectRatio = imWidth * 1.0 / imHeight;
   for (int i = 0; i < imWidth; ++i) {
     for (int j = 0; j < imHeight; ++j) {
+      float x = (-1.0 + i * 2.0 / (imWidth - 1.0)) * aspectRatio;
+      float y = -1.0 + j * 2.0 / (imHeight - 1.0);
+      auto point = Vector2f(x, y);
+      auto ray = camera->generateRay(point);
+
+      Hit hit;
+      LOG(point);
+      LOG(ray);
+      if (group->intersect(ray, hit, camera->getTMin())) {
+        LOGS("setting pixel");
+        image.SetPixel(i, j, pixelColor);
+      }
     }
   }
 
-  ///TODO: below demonstrates how to use the provided Image class
-  ///Should be removed when you start
-  Vector3f pixelColor (1.0f,0,0);
-  //width and height
-  Image image( 10 , 15 );
-  image.SetPixel( 5,5, pixelColor );
-  image.SaveImage("demo.bmp");
+  image.SaveImage(outputPath);
   return 0;
 }
 
