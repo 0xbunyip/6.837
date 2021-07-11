@@ -31,8 +31,8 @@ std::ostream& show(std::ostream& out, const char* label, H1&& value, T&&... rest
 
 template<typename ...T>
 std::ostream& show(const int line, const char* label, T&&... rest) {
-    std::cout << "[L" << line << "] ";
-    return show(std::cout, label, rest...);
+  std::cout << "[L" << line << "] ";
+  return show(std::cout, label, rest...);
 }
 
 std::ostream& shows(const int line, const std::string&& s);

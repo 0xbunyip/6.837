@@ -36,12 +36,7 @@ public:
   }
 
   virtual Ray generateRay(const Vector2f &point) {
-    LOG(d);
-    LOG(up);
-    LOG(right);
-    LOG(direction);
-    auto p = (point.x() * right) + (point.y() * up) + (d * direction);
-    LOG(p);
+    auto p = center + (point.x() * right) + (point.y() * up) + (d * direction);
     auto rayDir = p - center;
     rayDir.normalize();
     return Ray(center, rayDir);

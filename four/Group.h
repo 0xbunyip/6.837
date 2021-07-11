@@ -24,7 +24,9 @@ public:
   virtual bool intersect(const Ray &r, Hit &h, float tmin) {
     bool intersected = false;
     for (const auto& obj : objects_) {
-      intersected |= obj->intersect(r, h, tmin);
+      if (obj->intersect(r, h, tmin)) {
+        intersected = true;
+      }
     }
     return intersected;
   }

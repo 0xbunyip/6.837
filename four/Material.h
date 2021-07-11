@@ -9,37 +9,22 @@
 #include "texture.hpp"
 ///TODO:
 ///Implement Shade function that uses ambient, diffuse, specular and texture
-class Material
-{
+class Material {
 public:
-	
- Material( const Vector3f& d_color ,const Vector3f& s_color=Vector3f::ZERO, float s=0):
-  diffuseColor( d_color),specularColor(s_color), shininess(s)
-  {
-        	
-  }
+  Material(const Vector3f &d_color, const Vector3f &s_color = Vector3f::ZERO,
+           float s = 0)
+      : diffuseColor(d_color), specularColor(s_color), shininess(s) {}
 
-  virtual ~Material()
-    {
+  virtual ~Material() {}
 
-    }
+  virtual Vector3f getDiffuseColor() const { return diffuseColor; }
 
-  virtual Vector3f getDiffuseColor() const 
-  { 
-    return  diffuseColor;
-  }
-    
+  Vector3f Shade(const Ray &ray, const Hit &hit, const Vector3f &dirToLight,
+                 const Vector3f &lightColor) {
+    return Vector3f(1, 1, 1); }
 
-  Vector3f Shade( const Ray& ray, const Hit& hit,
-                  const Vector3f& dirToLight, const Vector3f& lightColor ) {
+ void loadTexture(const char *filename) { t.load(filename); }
 
-    return Vector3f(1,1,1) ; 
-		
-  }
-
-  void loadTexture(const char * filename){
-    t.load(filename);
-  }
  protected:
   Vector3f diffuseColor;
   Vector3f specularColor;

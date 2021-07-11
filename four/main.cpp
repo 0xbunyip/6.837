@@ -61,18 +61,15 @@ int main(int argc, char *argv[]) {
   // pixel in your output image.
   float aspectRatio = imWidth * 1.0 / imHeight;
   for (int i = 0; i < imWidth; ++i) {
+    float x = (-1.0 + i * 2.0 / (imWidth - 1.0)) * aspectRatio;
     for (int j = 0; j < imHeight; ++j) {
-      float x = (-1.0 + i * 2.0 / (imWidth - 1.0)) * aspectRatio;
       float y = -1.0 + j * 2.0 / (imHeight - 1.0);
       auto point = Vector2f(x, y);
       auto ray = camera->generateRay(point);
 
       Hit hit;
-      LOG(point);
-      LOG(ray);
       if (group->intersect(ray, hit, camera->getTMin())) {
-        LOGS("setting pixel");
-        image.SetPixel(i, j, pixelColor);
+        image.SetPixel(i, j, hit.getMaterial()->getDiffuseColor());
       }
     }
   }
