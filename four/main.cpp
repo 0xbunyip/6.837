@@ -71,7 +71,7 @@ int main(int argc, char *argv[]) {
       auto point = Vector2f(x, y);
       auto ray = camera->generateRay(point);
 
-      Vector3f color;
+      Vector3f color = background;
       Hit hit;
       if (group->intersect(ray, hit, camera->getTMin())) {
         auto p = ray.pointAtParameter(hit.getT());
@@ -87,10 +87,7 @@ int main(int argc, char *argv[]) {
 
           color += material->Shade(ray, hit, dirToLight, lightColor);
         }
-      } else {
-        color = background;
       }
-
       image.SetPixel(i, j, color);
     }
   }
