@@ -21,7 +21,7 @@ public:
     bool intersected = o->intersect(r2, h, tmin);
 
     const Vector4f normalInWorldSpace =
-        mi.transposed() * Vector4f(h.getNormal(), 0.0);
+        (mi.transposed() * Vector4f(h.getNormal(), 0.0)).normalized();
     h.set(h.getT(), h.getMaterial(), normalInWorldSpace.xyz());
 
     return intersected;
