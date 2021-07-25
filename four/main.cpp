@@ -64,6 +64,7 @@ int main(int argc, char *argv[]) {
   // the scene.  Write the color at the intersection to that
   // pixel in your output image.
   float aspectRatio = imWidth * 1.0 / imHeight;
+  int numPixels = imWidth * imHeight / 10;
   for (int i = 0; i < imWidth; ++i) {
     float x = (-1.0 + i * 2.0 / (imWidth - 1.0)) * aspectRatio;
     for (int j = 0; j < imHeight; ++j) {
@@ -89,6 +90,11 @@ int main(int argc, char *argv[]) {
         }
       }
       image.SetPixel(i, j, color);
+
+      int pixel = i * imHeight + j;
+      if (pixel > 1 && pixel / numPixels > (pixel - 1) / numPixels) {
+        std::cout << "Done " << pixel * 10.0 / numPixels << "%\n";
+      }
     }
   }
 
