@@ -56,7 +56,6 @@ int main(int argc, char *argv[]) {
   auto ambient = scene.getAmbientLight();
   auto background = scene.getBackgroundColor();
 
-  Vector3f pixelColor(1.0f, 0, 0);
   Image image(imWidth, imHeight);
 
   // Then loop over each pixel in the image, shooting a ray
