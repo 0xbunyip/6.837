@@ -28,13 +28,18 @@ public:
     auto diffuseWeight = Vector3f::dot(dirToLight, hit.getNormal());
     diffuseWeight = max(diffuseWeight, 0.0f);
 
+    auto materialColor = diffuseColor;
+    if (t.valid()) {
+      materialColor = t(hit.texCoord.x(), hit.texCoord.y());
+    }
+
     auto reflectionRay =
         2 * Vector3f::dot(dirToLight, hit.getNormal()) * hit.getNormal() -
         dirToLight;
     auto specularWeight = Vector3f::dot(dirToLight, reflectionRay);
     specularWeight = pow(max(specularWeight, 0.0f), shininess);
 
-    return diffuseWeight * lightColor * diffuseColor +
+    return diffuseWeight * lightColor * materialColor +
            specularWeight * lightColor * specularColor;
   }
 

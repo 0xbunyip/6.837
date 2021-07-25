@@ -48,9 +48,14 @@ public:
       return true;
     }
 
-    auto n = (1.0f - beta - gamma) * a_ + beta * b_ + gamma * c_;
+    auto alpha = 1.0f - beta - gamma;
+    auto n = alpha * a_ + beta * b_ + gamma * c_;
     n.normalize();
     h.set(t, material, n);
+
+    auto texCoord =
+        alpha * texCoords[0] + beta * texCoords[1] + gamma * texCoords[2];
+    h.setTexCoord(texCoord);
     return true;
   }
 
