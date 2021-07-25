@@ -7,8 +7,7 @@
 #include "Ray.h"
 #include "Hit.h"
 #include "texture.hpp"
-///TODO:
-///Implement Shade function that uses ambient, diffuse, specular and texture
+
 class Material {
 public:
   Material(const Vector3f &d_color, const Vector3f &s_color = Vector3f::ZERO,
@@ -24,7 +23,14 @@ public:
     auto diffuseWeight = Vector3f::dot(dirToLight, hit.getNormal());
     diffuseWeight = max(diffuseWeight, 0.0f);
 
-    return diffuseWeight * lightColor * diffuseColor;
+    auto reflectionRay =
+        2 * Vector3f::dot(dirToLight, hit.getNormal()) * hit.getNormal() -
+        dirToLight;
+    auto specularWeight = Vector3f::dot(dirToLight, reflectionRay);
+    specularWeight = pow(max(specularWeight, 0.0f), shininess);
+
+    return diffuseWeight * lightColor * diffuseColor +
+           specularWeight * lightColor * specularColor;
   }
 
  void loadTexture(const char *filename) { t.load(filename); }
@@ -35,7 +41,5 @@ public:
   float shininess;
   Texture t;
 };
-
-
 
 #endif // MATERIAL_H
