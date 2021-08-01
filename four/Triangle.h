@@ -49,7 +49,7 @@ public:
     }
 
     auto alpha = 1.0f - beta - gamma;
-    auto n = alpha * a_ + beta * b_ + gamma * c_;
+    auto n = alpha * normals[0] + beta * normals[1] + gamma * normals[2];
     n.normalize();
     h.set(t, material, n);
 

@@ -76,7 +76,7 @@ int main(int argc, char *argv[]) {
         auto p = ray.pointAtParameter(hit.getT());
         auto material = hit.getMaterial();
 
-        color = ambient;
+        color = material->getDiffuseColorAt(hit) * ambient;
         for (int k = 0; k < numLights; ++k) {
           auto light = scene.getLight(k);
           float distanceToLight = 0; // Unused.
@@ -88,6 +88,9 @@ int main(int argc, char *argv[]) {
         }
       }
       image.SetPixel(i, j, color);
+      if (color.x() >= 0.95 && color.y() >= 0.95 && color.z() >= 0.95) {
+        LOG(i, j, color);
+      }
 
       int pixel = i * imHeight + j;
       if (pixel > 1 && pixel / numPixels > (pixel - 1) / numPixels) {
