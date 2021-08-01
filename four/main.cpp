@@ -40,7 +40,6 @@ int main(int argc, char *argv[]) {
   assert(inputIdx > 0);
   assert(sizeIdx > 0);
   assert(outputIdx > 0);
-  assert(depthIdx > 0);
 
   auto scenePath = argv[inputIdx];
   auto imWidth = atoi(argv[sizeIdx]);
@@ -100,4 +99,3 @@ int main(int argc, char *argv[]) {
   image.SaveImage(outputPath);
   return 0;
 }
-

@@ -25,7 +25,7 @@ public:
     }
 
     if (t > h.getT()) {
-      return true;
+      return false;
     }
 
     h.set(t, material, normal_);

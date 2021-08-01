@@ -28,10 +28,10 @@ public:
   PerspectiveCamera(const Vector3f &center_, const Vector3f &direction_,
                     const Vector3f &up_, float angle_) {
     center = center_;
-    direction = direction_;
-    up = up_;
+    direction = direction_.normalized();
+    up = up_.normalized();
     angle = angle_;
-    right = Vector3f::cross(direction, up);
+    right = Vector3f::cross(direction, up).normalized();
     d = 1.0 / tan(angle * 0.5);
   }
 

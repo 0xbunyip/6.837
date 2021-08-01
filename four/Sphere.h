@@ -41,7 +41,7 @@ public:
 
     auto t = t1 >= tmin ? t1 : t2;
     if (t > h.getT()) {
-      return true;
+      return false;
     }
 
     auto P = Ro + t * Rd;

@@ -45,7 +45,7 @@ public:
     }
 
     if (t > h.getT()) {
-      return true;
+      return false;
     }
 
     auto alpha = 1.0f - beta - gamma;
