@@ -2,7 +2,7 @@
 #define SCENE_PARSER_H
 
 #include <cassert>
-#include <vecmath.h>
+#include <vecmath/vecmath.h>
 
 #include "SceneParser.h"
 #include "Camera.h"
@@ -54,12 +54,12 @@ public:
     {
         return ambient_light;
     }
-    
+
     int getNumLights() const
     {
         return num_lights;
     }
-    
+
     Light* getLight( int i ) const
     {
         assert( i >= 0 && i < num_lights );

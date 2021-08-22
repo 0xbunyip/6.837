@@ -4,8 +4,8 @@
 #include "Object3D.h"
 #include "octree.hpp"
 #include "Triangle.h"
-#include "Vector2f.h"
-#include "Vector3f.h"
+#include <vecmath/vecmath.h>
+
 //by default counterclockwise winding is front face
 struct Trig{
   Trig(){x[0]=0;x[1]=0;x[2]=0;}
@@ -21,7 +21,7 @@ public:
   std::vector<Vector3f>v;
   std::vector<Trig>t;
   std::vector<Vector3f>n;
-  std::vector<Vector2f>texCoord; 
+  std::vector<Vector2f>texCoord;
 
   virtual bool intersect( const Ray& r , Hit& h , float tmin );
   virtual bool intersectTrig(int idx);

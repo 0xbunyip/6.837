@@ -1,6 +1,6 @@
 #include "Ray.h"
 #include "Hit.h"
-#include "Vector3f.h"
+#include <vecmath/vecmath.h>
 #include "Mesh.hpp"
 #include "octree.hpp"
 #include <vector>
@@ -43,7 +43,7 @@ Box trigBox(int t, const Mesh & m ){
 	Box b;
 	b.mn = m.v[m.t[t][0]];
 	b.mx = m.v[m.t[t][0]];
-	
+
 	for(int ii = 1;ii<3;ii++){
 		for(int dim = 0; dim <3 ; dim++){
 			if(b.mn[dim]> m.v[m.t[t][ii]][dim]){
@@ -59,7 +59,7 @@ Box trigBox(int t, const Mesh & m ){
 
 ///@brief pbox parent's box
 void Octree::buildNode(OctNode  & parent, const Box & pbox ,
-	const std::vector<int>&trigs, 
+	const std::vector<int>&trigs,
 	const Mesh & m, int level)
 {
 	if(trigs.size() <= Octree :: max_trig
@@ -177,8 +177,8 @@ if(node->isTerm()){
 	return;
 }
 txm = 0.5*(tx0 + tx1);
-tym = 0.5*(ty0 + ty1);  
-tzm = 0.5*(tz0 + tz1);  
+tym = 0.5*(ty0 + ty1);
+tzm = 0.5*(tz0 + tz1);
 currNode = first_node(tx0,ty0,tz0,txm,tym,tzm);
 do{
 	switch (currNode){
@@ -229,7 +229,7 @@ void Octree::intersect(const Ray & ray){
 	if(rd[0]<0.0f){
 		ro[0] = size[0] - ro[0];
 		rd[0] = - rd[0];
-		aa |= 4 ; 
+		aa |= 4 ;
 	}
 	if(rd[1] < 0.0f){
 		ro[1] = size[1] - ro[1];
@@ -241,8 +241,8 @@ void Octree::intersect(const Ray & ray){
 		rd[2] = - rd[2];
 		aa |= 1 ;
 	}
-	
-	float divx = 1 / rd[0]; // IEEE stability fix
+
+        float divx = 1 / rd[0]; // IEEE stability fix
 	float divy = 1 / rd[1];
 	float divz = 1 / rd[2];
 

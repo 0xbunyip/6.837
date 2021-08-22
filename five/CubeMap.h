@@ -1,7 +1,7 @@
 #ifndef CUBEMAP_H
 #define CUBEMAP_H
 #include "texture.hpp"
-#include "Vector3f.h"
+#include <vecmath/vecmath.h>
 class CubeMap{
 public:
 ///@brief assumes a directory containing

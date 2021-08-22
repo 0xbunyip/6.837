@@ -7,7 +7,7 @@
 
 #include <cmath>
 #include <cstdio>
-#include <Vector3f.h>
+#include <vecmath/vecmath.h>
 
 class PerlinNoise
 {

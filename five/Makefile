@@ -1,10 +1,11 @@
 CC = g++
 SRCS = $(wildcard *.cpp)
-SRCS += $(wildcard vecmath/src/*.cpp)
+# SRCS += $(wildcard vecmath/src/*.cpp)
 OBJS = $(SRCS:.cpp=.o)
 PROG = a5
-CFLAGS = -O2 -Wall -Wextra
-INCFLAGS = -Ivecmath/include
+CFLAGS = -O2 -Wall -Wextra -std=c++17
+LINKFLAGS += -lvecmath
+# INCFLAGS = -Ivecmath/include
 
 all: $(PROG)
 
@@ -15,4 +16,4 @@ $(PROG): $(OBJS)
 	$(CC) $(CFLAGS) $< -c -o $@ $(INCFLAGS)
 
 clean:
-	rm -f *.bak vecmath/src/*.o *.o core.* $(PROG) 
+	rm -f *.bak vecmath/src/*.o *.o core.* $(PROG)

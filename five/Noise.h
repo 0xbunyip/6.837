@@ -1,6 +1,6 @@
 #ifndef NOISE_H
 #define NOISE_H
-#include "vecmath.h"
+#include <vecmath/vecmath.h>
 class Noise
 {
 public:
