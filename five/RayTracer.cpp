@@ -9,6 +9,8 @@
 
 #define EPSILON 0.001
 
+#define SQR(x) ((x) * (x))
+
 //IMPLEMENT THESE FUNCTIONS
 Vector3f mirrorDirection(const Vector3f &normal, const Vector3f &incoming) {
   return 2 * Vector3f::dot(-incoming, normal) * normal + incoming;
@@ -16,7 +18,17 @@ Vector3f mirrorDirection(const Vector3f &normal, const Vector3f &incoming) {
 
 bool transmittedDirection(const Vector3f &normal, const Vector3f &incoming,
                           float index_n, float index_nt,
-                          Vector3f &transmitted) {}
+                          Vector3f &transmitted) {
+  float dN = Vector3f::dot(incoming, normal);
+  float c = 1 - SQR(index_n) * (1 - SQR(dN)) / SQR(index_nt);
+  if (c < 0) {
+    return false;
+  }
+  auto a = index_n * (incoming - normal * dN) / index_nt;
+  auto b = normal * sqrt(c);
+  transmitted = a - b;
+  return true;
+}
 
 RayTracer::RayTracer(SceneParser *scene, int max_bounces) : m_scene(scene) {
   m_group = scene->getGroup();
@@ -29,6 +41,15 @@ RayTracer::~RayTracer() { }
 bool RayTracer::castShadowRay(const Ray &ray) const {
   Hit hit;
   return m_group->intersectAny(ray, hit, EPSILON);
+}
+
+float reflectionWeight(const Vector3f &normal, const Vector3f &incoming,
+                       const Vector3f &transmitted, float index_n,
+                       float index_nt) {
+  float R0 = SQR((index_nt - index_n) / (index_nt + index_n));
+  float c = index_n < index_nt ? abs(Vector3f::dot(incoming, normal))
+                               : abs(Vector3f::dot(transmitted, normal));
+  return R0 + (1 - R0) * pow((1 - c), 5);
 }
 
 Vector3f RayTracer::traceRay(Ray &ray, float tmin, int bounces,
@@ -66,9 +87,28 @@ Vector3f RayTracer::traceRay(Ray &ray, float tmin, int bounces,
 
   // Trace reflection rays.
   Ray reflectionRay(p, mirrorDirection(hit.getNormal(), ray.getDirection()));
-  Hit refHit;
-  color += material->getSpecularColor() *
-           traceRay(reflectionRay, EPSILON, bounces - 1, refr_index, refHit);
+  Hit reflHit;
+  auto reflectionColor =
+      material->getSpecularColor() *
+      traceRay(reflectionRay, EPSILON, bounces - 1, refr_index, reflHit);
+
+  // Trace refraction rays.
+  float mrefr_index = material->getRefractionIndex();
+  float R = 1.0;
+  Vector3f refractionColor(0, 0, 0);
+  if (mrefr_index > 0) {
+    Vector3f refractionDir;
+    if (transmittedDirection(hit.getNormal(), ray.getDirection(), refr_index,
+                             mrefr_index, refractionDir)) {
+      Ray refractionRay(p, refractionDir);
+      Hit refrHit;
+      refractionColor =
+          traceRay(refractionRay, EPSILON, bounces - 1, mrefr_index, refrHit);
+      R = reflectionWeight(hit.getNormal(), ray.getDirection(), refractionDir,
+                           refr_index, mrefr_index);
+    }
+  }
+  color += R * reflectionColor + (1 - R) * refractionColor;
 
   return color;
 }
