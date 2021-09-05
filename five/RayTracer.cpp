@@ -10,8 +10,9 @@
 #define EPSILON 0.001
 
 //IMPLEMENT THESE FUNCTIONS
-//These function definitions are mere suggestions. Change them as you like.
-Vector3f mirrorDirection(const Vector3f &normal, const Vector3f &incoming) {}
+Vector3f mirrorDirection(const Vector3f &normal, const Vector3f &incoming) {
+  return 2 * Vector3f::dot(-incoming, normal) * normal + incoming;
+}
 
 bool transmittedDirection(const Vector3f &normal, const Vector3f &incoming,
                           float index_n, float index_nt,
@@ -32,8 +33,13 @@ bool RayTracer::castShadowRay(const Ray &ray) const {
 
 Vector3f RayTracer::traceRay(Ray &ray, float tmin, int bounces,
                              float refr_index, Hit &hit) const {
+  auto background = m_scene->getBackgroundColor(ray.getDirection());
+  if (bounces < 0) {
+    return background;
+  }
+
   if (!m_group->intersect(ray, hit, tmin)) {
-    return m_scene->getBackgroundColor(ray.getDirection());
+    return background;
   }
 
   auto p = ray.pointAtParameter(hit.getT());
@@ -45,6 +51,7 @@ Vector3f RayTracer::traceRay(Ray &ray, float tmin, int bounces,
     auto light = m_scene->getLight(k);
     float distanceToLight = 0;
 
+    // Cast shadow ray.
     Ray rayToLight(p, light->getDirectionToLight(p));
     if (castShadowRay(rayToLight)) {
       continue;
@@ -56,5 +63,12 @@ Vector3f RayTracer::traceRay(Ray &ray, float tmin, int bounces,
     // LOG(ray, hit, dirToLight, lightColor);
     color += material->Shade(ray, hit, dirToLight, lightColor);
   }
+
+  // Trace reflection rays.
+  Ray reflectionRay(p, mirrorDirection(hit.getNormal(), ray.getDirection()));
+  Hit refHit;
+  color += material->getSpecularColor() *
+           traceRay(reflectionRay, EPSILON, bounces - 1, refr_index, refHit);
+
   return color;
 }

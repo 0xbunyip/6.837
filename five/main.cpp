@@ -87,7 +87,7 @@ int main(int argc, char *argv[]) {
       auto ray = camera->generateRay(point);
 
       Hit hit;
-      auto color = tracer->traceRay(ray, camera->getTMin(), 0, 0.0, hit);
+      auto color = tracer->traceRay(ray, camera->getTMin(), bounces, 0.0, hit);
       image.SetPixel(i, j, color);
       // LOG(i, j, color);
 
