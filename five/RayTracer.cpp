@@ -45,12 +45,9 @@ Vector3f RayTracer::traceRay(Ray &ray, float tmin, int bounces,
     auto light = m_scene->getLight(k);
     float distanceToLight = 0;
 
-    Vector3f lightPos;
-    if (light->getPosition(lightPos)) {
-      Ray rayToLight(p, (lightPos - p).normalized());
-      if (castShadowRay(rayToLight)) {
-        continue;
-      }
+    Ray rayToLight(p, light->getDirectionToLight(p));
+    if (castShadowRay(rayToLight)) {
+      continue;
     }
 
     Vector3f dirToLight, lightColor;
