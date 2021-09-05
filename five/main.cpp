@@ -76,11 +76,10 @@ int main(int argc, char *argv[]) {
         auto p = ray.pointAtParameter(hit.getT());
         auto material = hit.getMaterial();
 
-        Vector3f color;
         // color = material->getDiffuseColorAt(hit) * ambient;
         for (int k = 0; k < numLights; ++k) {
           auto light = scene.getLight(k);
-          float distanceToLight = 0; // Unused.
+          float distanceToLight = 0;
 
           Vector3f dirToLight, lightColor;
           light->getIllumination(p, dirToLight, lightColor, distanceToLight);
