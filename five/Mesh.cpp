@@ -6,7 +6,7 @@
 #include <utility>
 #include <sstream>
 
-#define SMOOTH (v.size()>120)
+#define SMOOTH (v.size()>1)
 
 void intersectCall(int idx, void ** arg)
 {
@@ -49,7 +49,7 @@ bool Mesh ::intersectTrig(int idx){
 	bool result = false;
 	Triangle triangle(v[t[idx][0]],
 		v[t[idx][1]],v[t[idx][2]],material);
-	
+
   //some shitty hack
 //change at will
 if(SMOOTH){
@@ -58,7 +58,7 @@ if(SMOOTH){
 		  triangle.normals[jj] = n[t[idx][jj]];
 	  }
 	}else{
-    
+
     for(int jj=0;jj<3;jj++){
 		  triangle.normals[jj] = n[idx];
 	  }

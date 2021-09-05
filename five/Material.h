@@ -16,6 +16,7 @@ public:
 
   virtual ~Material();
   virtual Vector3f getDiffuseColor() const;
+  virtual Vector3f getDiffuseColorAt(const Hit &h);
 
   Vector3f Shade(const Ray &ray, const Hit &hit, const Vector3f &dirToLight,
                  const Vector3f &lightColor);

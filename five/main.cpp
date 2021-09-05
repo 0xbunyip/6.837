@@ -76,18 +76,20 @@ int main(int argc, char *argv[]) {
   float aspectRatio = imWidth * 1.0 / imHeight;
   for (int i = 0; i < imWidth; ++i) {
     float x = (-1.0 + i * 2.0 / (imWidth - 1.0)) * aspectRatio;
-    // if (i != 0) continue;
+    // if (i != imWidth / 2) continue;
     for (int j = 0; j < imHeight; ++j) {
-      // if (j != 0)
+      // if (j != imHeight / 2 + 10)
       //   continue;
 
       float y = -1.0 + j * 2.0 / (imHeight - 1.0);
+      // LOG(x, y);
       auto point = Vector2f(x, y);
       auto ray = camera->generateRay(point);
 
       Hit hit;
       auto color = tracer->traceRay(ray, camera->getTMin(), 0, 0.0, hit);
       image.SetPixel(i, j, color);
+      // LOG(i, j, color);
 
       printProgress(i, j, imWidth, imHeight);
     }

@@ -38,7 +38,8 @@ Vector3f RayTracer::traceRay(Ray &ray, float tmin, int bounces,
 
   auto p = ray.pointAtParameter(hit.getT());
   auto material = hit.getMaterial();
-  Vector3f color(m_scene->getAmbientLight());
+  // LOG(hit.getT(), p);
+  Vector3f color(m_scene->getAmbientLight() * material->getDiffuseColorAt(hit));
 
   for (int k = 0; k < m_scene->getNumLights(); ++k) {
     auto light = m_scene->getLight(k);
@@ -55,6 +56,7 @@ Vector3f RayTracer::traceRay(Ray &ray, float tmin, int bounces,
     Vector3f dirToLight, lightColor;
     light->getIllumination(p, dirToLight, lightColor, distanceToLight);
 
+    // LOG(ray, hit, dirToLight, lightColor);
     color += material->Shade(ray, hit, dirToLight, lightColor);
   }
   return color;

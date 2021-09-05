@@ -9,6 +9,13 @@ Material::~Material() {}
 
 Vector3f Material::getDiffuseColor() const { return diffuseColor; }
 
+Vector3f Material::getDiffuseColorAt(const Hit &hit) {
+  if (t.valid() && hit.hasTex) {
+    return t(hit.texCoord.x(), hit.texCoord.y());
+  }
+  return diffuseColor;
+}
+
 Vector3f Material::Shade(const Ray &ray, const Hit &hit,
                          const Vector3f &dirToLight,
                          const Vector3f &lightColor) {
@@ -26,7 +33,13 @@ Vector3f Material::Shade(const Ray &ray, const Hit &hit,
     kd = noise.getColor(ray.getOrigin() + ray.getDirection() * hit.getT());
   }
 
-  Vector3f color = clampedDot(dirToLight, n) * pointwiseDot(lightColor, kd);
+  Vector3f diffuse = clampedDot(dirToLight, n) * pointwiseDot(lightColor, kd);
+
+  auto reflectionRay = 2 * Vector3f::dot(dirToLight, n) * n - dirToLight;
+  Vector3f specular = pow(clampedDot(dirToLight, reflectionRay), shininess) *
+                      pointwiseDot(lightColor, specularColor);
+
+  Vector3f color = diffuse + specular;
   return color;
 }
 
