@@ -13,14 +13,16 @@ class RayTracer {
 public:
   RayTracer() { assert(false); }
 
-  RayTracer(SceneParser *scene, int max_bounces // more arguments as you need...
-  );
+  RayTracer(SceneParser *scene, int max_bounces); // more arguments as you need
   ~RayTracer();
 
   Vector3f traceRay(Ray &ray, float tmin, int bounces, float refr_index,
                     Hit &hit) const;
 
+  bool castShadowRay(const Ray &ray) const;
+
 private:
+  Group *m_group;
   SceneParser* m_scene;
   int m_maxBounces;
 };

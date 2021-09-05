@@ -7,6 +7,7 @@
 
 #include "Camera.h"
 #include "Image.h"
+#include "RayTracer.h"
 #include "SceneParser.h"
 #include "util.h"
 #include <string.h>
@@ -17,12 +18,21 @@ float clampedDepth ( float depthInput, float depthMin , float depthMax);
 
 #include "bitmap_image.hpp"
 
+void printProgress(int i, int j, int imWidth, int imHeight) {
+  int numPixels = imWidth * imHeight / 10;
+  int pixel = i * imHeight + j;
+  if (pixel > 1 && pixel / numPixels > (pixel - 1) / numPixels) {
+    std::cout << "Done " << pixel * 10.0 / numPixels << "%\n";
+  }
+}
+
 int main(int argc, char *argv[]) {
   // This loop loops over each of the input arguments.
   // argNum is initialized to 1 because the first
   // "argument" provided to the program is actually the
   // name of the executable (in our case, "a5").
-  int inputIdx = -1, sizeIdx = -1, outputIdx = -1, depthIdx = -1;
+  int inputIdx = -1, sizeIdx = -1, outputIdx = -1, depthIdx = -1,
+      bouncesIdx = -1;
   for (int argNum = 1; argNum < argc; ++argNum) {
     std::cout << "Argument " << argNum << " is: " << argv[argNum] << std::endl;
     std::string arg = argv[argNum];
@@ -35,6 +45,8 @@ int main(int argc, char *argv[]) {
       outputIdx = argNum + 1;
     } else if (arg == "-depth") {
       depthIdx = argNum + 1;
+    } else if (arg == "-bounces") {
+      bouncesIdx = argNum + 1;
     }
   }
   assert(inputIdx > 0);
@@ -45,14 +57,15 @@ int main(int argc, char *argv[]) {
   auto imWidth = atoi(argv[sizeIdx]);
   auto imHeight = atoi(argv[sizeIdx + 1]);
   auto outputPath = argv[outputIdx];
+  int bounces = 0;
+  if (bouncesIdx > 0) {
+    bounces = atoi(argv[bouncesIdx]);
+  }
 
   // First, parse the scene using SceneParser.
-  auto scene = SceneParser(scenePath);
-  auto camera = scene.getCamera();
-  auto group = scene.getGroup();
-
-  int numLights = scene.getNumLights();
-  auto ambient = scene.getAmbientLight();
+  SceneParser* scene = new SceneParser(scenePath);
+  auto camera = scene->getCamera();
+  auto tracer = std::make_unique<RayTracer>(scene, bounces);
 
   Image image(imWidth, imHeight);
 
@@ -61,38 +74,22 @@ int main(int argc, char *argv[]) {
   // the scene.  Write the color at the intersection to that
   // pixel in your output image.
   float aspectRatio = imWidth * 1.0 / imHeight;
-  int numPixels = imWidth * imHeight / 10;
   for (int i = 0; i < imWidth; ++i) {
     float x = (-1.0 + i * 2.0 / (imWidth - 1.0)) * aspectRatio;
+    // if (i != 0) continue;
     for (int j = 0; j < imHeight; ++j) {
+      // if (j != 0)
+      //   continue;
+
       float y = -1.0 + j * 2.0 / (imHeight - 1.0);
       auto point = Vector2f(x, y);
       auto ray = camera->generateRay(point);
-      auto background = scene.getBackgroundColor(ray.getDirection());
 
-      Vector3f color = background;
       Hit hit;
-      if (group->intersect(ray, hit, camera->getTMin())) {
-        auto p = ray.pointAtParameter(hit.getT());
-        auto material = hit.getMaterial();
-
-        // color = material->getDiffuseColorAt(hit) * ambient;
-        for (int k = 0; k < numLights; ++k) {
-          auto light = scene.getLight(k);
-          float distanceToLight = 0;
-
-          Vector3f dirToLight, lightColor;
-          light->getIllumination(p, dirToLight, lightColor, distanceToLight);
-
-          color += material->Shade(ray, hit, dirToLight, lightColor);
-        }
-      }
+      auto color = tracer->traceRay(ray, camera->getTMin(), 0, 0.0, hit);
       image.SetPixel(i, j, color);
 
-      int pixel = i * imHeight + j;
-      if (pixel > 1 && pixel / numPixels > (pixel - 1) / numPixels) {
-        std::cout << "Done " << pixel * 10.0 / numPixels << "%\n";
-      }
+      printProgress(i, j, imWidth, imHeight);
     }
   }
 

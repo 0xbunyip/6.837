@@ -29,6 +29,15 @@ public:
     return intersected;
   }
 
+  virtual bool intersectAny(const Ray &r, Hit &h, float tmin) {
+    for (const auto& obj : objects_) {
+      if (obj->intersect(r, h, tmin)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   void addObject(int index, Object3D *obj) {
     objects_[index].reset(obj); //
   }

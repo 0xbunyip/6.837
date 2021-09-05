@@ -11,6 +11,7 @@ public:
   virtual ~Light() {}
   virtual void getIllumination(const Vector3f &p, Vector3f &dir, Vector3f &col,
                                float &distanceToLight) const = 0;
+  virtual bool getPosition(Vector3f &p) const = 0;
 };
 
 class DirectionalLight : public Light {
@@ -31,6 +32,8 @@ public:
     col = color;
     distanceToLight = FLT_MAX;
   }
+
+  virtual bool getPosition(Vector3f &p) const { return false; }
 
 private:
   DirectionalLight(); // don't use
@@ -55,7 +58,12 @@ public:
     distanceToLight = dir.abs();
     dir = dir / dir.abs();
     col = color / (1 + falloff * distanceToLight * distanceToLight);
-}
+  }
+
+  virtual bool getPosition(Vector3f &p) const {
+    p = position;
+    return true;
+  }
 
 private:
   PointLight(); // don't use
